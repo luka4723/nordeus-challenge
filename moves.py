@@ -9,6 +9,9 @@ class Move:
     def cast(self,target: beings.Being = None):
         pass
 
+    def __str__(self):
+        return f"{type(self).__name__}"
+
 class Slash(Move):    
     def cast(self, target):
         target.hp -= (self.caster.atk*defs.SLASH_DMG)/target.defense
@@ -22,7 +25,7 @@ class BattleCry(Move):
         self.caster.status_effects.append(status_effects.IncreaseAtk(self.caster,defs.BATTLECRY_ATK_INC,defs.BATTLECRY_LEN))
 
 class SecondWind(Move):
-    def cast(self):
+    def cast(self,target = None):
         self.caster.hp += defs.SECONDWIND_HEAL*self.caster.magic
 
 class ShadowBolt(Move):

@@ -1,5 +1,6 @@
 import moves
 import defs
+import status_effects
 
 class Being:
     def __init__(self,hp,atk,defense,magic):
@@ -7,14 +8,29 @@ class Being:
         self.atk = atk
         self.defense = defense
         self.magic = magic
-        self.moves = []
-        self.status_effects = []
+        self.moves: list[moves.Move] = []
+        self.status_effects: list[status_effects.Effect] = []
+    
+    def to_dict(self):
+        return {
+            "type": type(self).__name__,
+            # "hp": self.hp,
+            # "atk": self.atk,
+            # "defense": self.defense,
+            # "magic": self.magic
+        }
+    
+    def __str__(self):
+        return f"{type(self).__name__}"
 
 class Hero(Being):
     def __init__(self):
         super().__init__(defs.HERO_HP, defs.HERO_ATK, defs.HERO_DEF, defs.HERO_MAGIC)
+        self.max_hp = defs.HERO_HP
+        self.xp = 0
+        self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
-     
+        self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
 
 # Simulating higher levels each subsequent enemy
 class Foe(Being):
@@ -25,6 +41,29 @@ class Foe(Being):
         self.atk += defs.ORDER_ATK * order
         self.defense += defs.ORDER_DEFENSE * order
         self.magic += defs.ORDER_MAGIC * order
+    
+    def to_dict(self):
+        new = super().to_dict()
+        new["order"] = self.order
+        return new
+
+    @staticmethod
+    def from_dict(data):
+
+        types = {
+            "Witch": Witch,
+            "Spider": Spider,
+            "Dragon": Dragon,
+            "Warrior": Warrior,
+            "Mage": Mage
+        }
+
+        cls = types[data["type"]]
+
+        return cls(data["order"])
+
+    # def __str__(self):
+    #     return f"Type: {type(self).__name__}, Order: {self.order}"
 
 class Witch(Foe):
     def __init__(self, order):
