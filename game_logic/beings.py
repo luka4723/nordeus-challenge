@@ -1,6 +1,6 @@
-import moves
-import defs
-import status_effects
+from game_logic import moves
+from game_logic import defs
+from game_logic import status_effects
 
 class Being:
     def __init__(self,hp,atk,defense,magic):
@@ -31,7 +31,7 @@ class Hero(Being):
         self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
-
+        self.available_moves.append(moves.ClawSwipe(self))
 # Simulating higher levels each subsequent enemy
 class Foe(Being):
     def __init__(self, order, hp, atk, defense, magic):

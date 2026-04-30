@@ -1,4 +1,4 @@
-import beings
+from game_logic import beings
 
 class Effect:
     def __init__(self, carrier: beings.Being, value, duration):

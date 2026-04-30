@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 import random
-import beings
+from game_logic import beings
 
 
 app = FastAPI()

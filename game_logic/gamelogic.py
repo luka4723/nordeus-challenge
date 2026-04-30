@@ -1,6 +1,6 @@
-import beings
-import defs
-import status_effects
+from game_logic import beings
+from game_logic import defs
+from game_logic import status_effects
 import random
 import requests
 

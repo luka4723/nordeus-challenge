@@ -1,21 +1,24 @@
 import requests
-import beings
-import gamelogic
+from game_logic import beings
+from game_logic import gamelogic
 import random
     
-if __name__ == '__main__':
+def getState():
     # First GET
     r1 = requests.get("http://127.0.0.1:8000/")
     data = r1.json()
     my_id = data["id"]
     #print(my_id)
     enemies: list[beings.Foe] = [beings.Foe.from_dict(m) for m in data["run_order"]]
-    print("\nOrder of fights:")
+    #print("\nOrder of fights:")
     for enemy in enemies:
         print(enemy)
-    print()
+    #print()
 
     hero = beings.Hero()
+    return hero, enemies
+
+def placeholder():
     i=0
     while i < len(enemies):
         encounter = gamelogic.Encounter(hero,enemies[i])
