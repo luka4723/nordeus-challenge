@@ -28,10 +28,13 @@ def home():
     }
 
 
-@app.get("/user/{user_id}")
+@app.get("/user/1")
 def get_user(user_id: int, enemy_hp: float, enemy_atk: float, enemy_def: float, enemy_mag: float, 
              hero_hp: float, hero_atk: float, hero_def: float, hero_mag: float):
-    return random.randint(0,3)
+    num =random.randint(0,3)
+    return {
+        "ord" : num
+    }
 
 if __name__ == '__main__':
     uvicorn.run(app)

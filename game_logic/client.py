@@ -8,12 +8,9 @@ def getState():
     r1 = requests.get("http://127.0.0.1:8000/")
     data = r1.json()
     my_id = data["id"]
-    #print(my_id)
     enemies: list[beings.Foe] = [beings.Foe.from_dict(m) for m in data["run_order"]]
-    #print("\nOrder of fights:")
     for enemy in enemies:
         print(enemy)
-    #print()
 
     hero = beings.Hero()
     return hero, enemies

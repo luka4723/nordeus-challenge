@@ -31,7 +31,7 @@ class Hero(Being):
         self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
-        self.available_moves.append(moves.ClawSwipe(self))
+        self.available_moves.append(moves.DragonScales(self))
 # Simulating higher levels each subsequent enemy
 class Foe(Being):
     def __init__(self, order, hp, atk, defense, magic):

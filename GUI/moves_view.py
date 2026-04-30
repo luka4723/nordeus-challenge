@@ -5,23 +5,6 @@ from GUI import elements
 from game_logic import beings
 import time
 
-MOVE_TYPES = {
-    "Slash": "physical", "ShieldUp": "physical", "BattleCry": "physical",
-    "SecondWind": "physical", "Headbutt": "physical", "RustyBlade": "physical",
-    "DirtyKick": "physical", "Frenzy": "physical", "Bite": "physical",
-    "WebThrow": "physical", "Pounce": "physical", "Skitter": "physical",
-    "ClawSwipe": "physical", "Intimidate": "physical", "DragonScales": "physical",
-    "ShadowBolt": "magic", "DrainLife": "magic", "Curse": "magic",
-    "DarkPact": "magic", "ArcaneSurge": "magic", "ManaDrain": "magic",
-    "HexShield": "magic", "Firebolt": "fire", "FlameBreath": "fire",
-}
-
-TYPE_COLORS = {
-    "fire":     arcade.color.DARK_RED,
-    "magic":    (80, 20, 140),
-    "physical": (80, 60, 20),
-}
-
 def move_name(move) -> str:
     name = type(move).__name__
     result = [name[0]]
@@ -43,7 +26,7 @@ class MovesView(arcade.View):
         self.hovered_move = None
         self.hover_start_time = 0
         self.hovered_button = None
-        self.tooltip_delay = 0.5
+        self.tooltip_delay = 0.75
         self.build_ui()
 
     def build_ui(self):

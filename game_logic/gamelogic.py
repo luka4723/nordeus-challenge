@@ -1,6 +1,6 @@
 from game_logic import beings
 from game_logic import defs
-from game_logic import status_effects
+from game_logic import status_effects, moves
 import random
 import requests
 
@@ -8,26 +8,12 @@ class Encounter:
     def __init__(self, hero: beings.Hero, enemy: beings.Foe):
         self.hero = hero
         self.enemy = enemy
-        self.result = False
+        self.result = None
 
-        print(f"Starting encounter against {type(enemy).__name__}")
-        print(f"{type(enemy).__name__}'s stats:")
-        print(f"HP : {round(enemy.hp,2)}")
-        print(f"ATK: {round(enemy.atk,2)}")
-        print(f"DEF: {round(enemy.defense,2)}")
-        print(f"MAG: {round(enemy.magic,2)}\n")
-
-        print(hero.hp)
-
-    def heroMove(self):
-        move_ord = self.queryMove()
-        self.hero.moves[move_ord].cast(self.enemy)
-        print(f"You used {type(self.hero.moves[move_ord]).__name__} against the foe.")
-        print(f"Foe's new health is {round(self.enemy.hp,2)}\n")
+    def heroMove(self, move : moves.Move):
+        move.cast(self.enemy)
         if self.enemy.hp <= 0:
-            print("You win!")
             self.hero.hp = self.hero.max_hp
-            
             match self.enemy.order:
                 case 1:
                     xp = defs.XP_LVL1
@@ -41,10 +27,11 @@ class Encounter:
                     xp = defs.XP_LVL5
             
             self.hero.xp += xp
-            if self.hero.xp >= 100:
-                self.hero.xp -= 100
-                self.hero.lvl += 1
-                levelUp(self.hero)
+            # MOVED TO GAME VIEW
+            # if self.hero.xp >= 100:
+            #     self.hero.xp -= 100
+            #     self.hero.lvl += 1
+            #     levelUp(self.hero)
 
             order = random.randint(0,3)
             if type(self.enemy.moves[order]) in [type(m) for m in self.hero.available_moves]:
@@ -55,8 +42,8 @@ class Encounter:
             self.result = True
             return True
 
-    def foeMove(self, my_id):
-        r2 = requests.get(f"http://127.0.0.1:8000/user/{my_id}", params={
+    def foeMove(self):
+        r2 = requests.get(f"http://127.0.0.1:8000/user/1", params={
                 "enemy_hp": self.enemy.hp,
                 "enemy_atk": self.enemy.atk,
                 "enemy_def": self.enemy.defense,
@@ -67,21 +54,13 @@ class Encounter:
                 "hero_mag": self.hero.magic 
             })
         move = r2.json()
+
+
         self.enemy.moves[move].cast(self.hero)
-        print(f"Foe used {type(self.enemy.moves[move]).__name__} against you")
-        print(f"Your new health is {round(self.hero.hp,2)}\n")
-        if self.hero.hp <= 0:
-            print("You Lose!")
-            return True
-    
-    def queryMove(self):
-        print("Your moves:")
-        i = 1
-        for move in self.hero.moves:
-            print(f"{i}. {move}")
-            i+=1
-        num = int(input("> Choose a number from 1 to 4: "))
-        return num-1
+        if self.hero.hp <= 0 and self.result is None:
+            self.result = False
+        if self.result is None:
+            return self.enemy.moves[move]
 
     def applyEffectsH(self):
         new_status = []
@@ -94,6 +73,8 @@ class Encounter:
                 effect.remove()
         self.hero.status_effects = new_status
 
+        if self.hero.hp<=0 and self.result is None:
+            self.result = False
 
     def applyEffectsE(self):
         new_status = []
@@ -106,24 +87,8 @@ class Encounter:
                 effect.remove()
         self.enemy.status_effects = new_status
 
-def manageMoves(hero : beings.Hero):
-    i = 1
-    print("Active moves:")
-    print(f"1. {hero.moves[0]}")
-    print(f"2. {hero.moves[1]}")
-    print(f"3. {hero.moves[2]}")
-    print(f"4. {hero.moves[3]}\n")
-    
-    print("Available moves:")
-    for move in hero.available_moves:
-        print(f"{i}. {move}")
-        i+=1
-    
-    res = input("> Choose 4 moves: ").split()
-    print(res)
-    hero.moves = []
-    for i in range(0, len(res)):
-        hero.moves.append(hero.available_moves[int(res[i])-1])
+        if self.enemy.hp<=0 and self.result is None:
+            self.result = True
 
 def levelUp(hero : beings.Hero):
     print("You leveled up! Choose which stat to upgrade:")

@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 from pathlib import Path
 import game_logic.client
-from GUI import main_menu_view,moves_view,elements
+from GUI import main_menu_view,moves_view,elements, battle_view
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res", assets_path)
@@ -15,9 +15,6 @@ def make_label(text, font_size=16, bold=False, color=arcade.color.WHITE):
         text_color=color,
         font_name="Kenney Mini",
     )
-
-# def make_panel(width, height, color=(20, 20, 40, 200)):
-#     return arcade.gui.UIWidget(width=width, height=height).with_background(color=color)
 
 class GameView(arcade.View):
     def __init__(self):
@@ -74,6 +71,15 @@ class GameView(arcade.View):
             btns.append(btn)
             left_panel.add(btn)
         
+        @btns[0].event("on_click")
+        def on_click_switch_button(event):
+            self.window.show_view(battle_view.BattleView(
+                                                        hero=self.hero,
+                                                        enemy=self.enemies[self.current_floor],
+                                                        hero_texture=self.player_texture,
+                                                        enemy_texture=self.enemy_textures[self.current_floor],
+                                                        return_view=self
+                                                    ))
         @btns[1].event("on_click")
         def on_click_switch_button(event):
             self.window.show_view(moves_view.MovesView(self.hero,self))
@@ -174,6 +180,7 @@ class GameView(arcade.View):
     def on_show_view(self):
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
         self.manager.enable()
+        self.build_ui()
 
     def on_hide_view(self):
         self.manager.disable()
