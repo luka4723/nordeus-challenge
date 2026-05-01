@@ -68,9 +68,33 @@ class Hero(Being):
 
 class Knight(Hero):
     def __init__(self):
-        super().__init__(defs.HERO_HP, defs.HERO_ATK, defs.HERO_DEF, defs.HERO_MAGIC)
+        super().__init__(defs.KNIGHT_HP, defs.KNIGHT_ATK, defs.KNIGHT_DEF, defs.KNIGHT_MAGIC)
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
+
+class Wizard(Hero):
+    def __init__(self):
+        super().__init__(defs.WIZARD_HP, defs.WIZARD_ATK, defs.WIZARD_DEF, defs.WIZARD_MAGIC)
+        self.moves = [moves.Firebolt(self), moves.Hypnotize(self), moves.HexShield(self), moves.ShatteredFlask(self)]
+        self.available_moves = [moves.Firebolt(self), moves.Hypnotize(self), moves.HexShield(self), moves.ShatteredFlask(self)]
+
+class Rogue(Hero):
+    def __init__(self):
+        super().__init__(defs.ROGUE_HP, defs.ROGUE_ATK, defs.ROGUE_DEF, defs.ROGUE_MAGIC)
+        self.moves = [moves.Shanking(self), moves.DirtThrow(self), moves.Bandages(self), moves.RustyBlade(self)]
+        self.available_moves = [moves.Shanking(self), moves.DirtThrow(self), moves.Bandages(self), moves.RustyBlade(self)]
+
+class Berserker(Hero):
+    def __init__(self):
+        super().__init__(defs.BERSERKER_HP, defs.BERSERKER_ATK, defs.BERSERKER_DEF, defs.BERSERKER_MAGIC)
+        self.moves = [moves.Slash(self), moves.Frenzy(self), moves.RustyBlade(self), moves.SecondWind(self)]
+        self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
+
+class Granny(Hero):
+    def __init__(self):
+        super().__init__(defs.GRANNY_HP, defs.GRANNY_ATK, defs.GRANNY_DEF, defs.GRANNY_MAGIC)
+        self.moves = [moves.RollingPin(self), moves.RollingPin(self), moves.RollingPin(self), moves.RollingPin(self)]
+        self.available_moves = [moves.RollingPin(self), moves.RollingPin(self), moves.RollingPin(self), moves.RollingPin(self)]
 
 # Simulating higher levels each subsequent enemy
 class Foe(Being):

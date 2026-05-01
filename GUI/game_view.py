@@ -19,7 +19,7 @@ def make_label(text, font_size=16, bold=False, color=arcade.color.WHITE):
     )
 
 class GameView(arcade.View):
-    def __init__(self, map, from_save=False):
+    def __init__(self, map, hero, play_tex,from_save=False):
         super().__init__()
         self.manager = arcade.gui.UIManager()
         arcade.load_font(":resources:/fonts/ttf/Kenney/Kenney_Mini.ttf")
@@ -46,7 +46,8 @@ class GameView(arcade.View):
                     self.enemies.append(enemy)
                 self.current_map = save_dict["map"]
         else:
-            self.hero, self.enemies = game_logic.client.getState()
+            self.hero = hero
+            self.enemies = game_logic.client.getState()
             self.current_floor = 0
         
         self.maps = [
@@ -60,7 +61,7 @@ class GameView(arcade.View):
             tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[23*17]
         ]
 
-        self.player_texture = texture_list_heroes[7].flip_left_right()
+        self.player_texture = play_tex
         
         self.enemy_textures = []
         enemy_dict = {
@@ -70,6 +71,7 @@ class GameView(arcade.View):
             "Warrior": texture_list[7],
             "Mage": texture_list[6]
         }
+
         for enemy in self.enemies:
             self.enemy_textures.append(enemy_dict[f"{type(enemy).__name__}"])
         self.build_ui()

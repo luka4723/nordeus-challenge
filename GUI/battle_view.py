@@ -1,8 +1,8 @@
 import arcade
 import arcade.gui
-from game_logic import beings, gamelogic, moves
+from game_logic import beings, gamelogic, moves, status_effects
 from GUI import elements, main_menu_view
-import time
+import time, random
 
 def format_str(val, width=6):
     return str(val).ljust(width)
@@ -175,7 +175,12 @@ class BattleView(arcade.View):
             status_num_enemy_before = len(self.enemy.status_effects)
             hp_before_foe_move = self.hero.hp
             
-            foe_move = self.game.foeMove()
+            if any(isinstance(effect, status_effects.Dizzy) for effect in self.enemy.status_effects):
+                foe_move = self.enemy.moves[random.randint(0,3)]
+                if self.hero.hp <= 0 and self.game.result is None:
+                    self.game.result = False
+            else:
+                foe_move = self.game.foeMove()
             
             if foe_move:
                 self.log_lines.append(f"{type(self.enemy).__name__} used {type(foe_move).__name__}")

@@ -45,10 +45,9 @@ class Encounter:
                 "hero_hp": self.hero.hp,
                 "hero_atk": self.hero.atk,
                 "hero_def": self.hero.defense,
-                "hero_mag": self.hero.magic 
+                "hero_mag": self.hero.magic, 
             })
-        move = r2.json()
-
+        move = r2.json()["ord"]
 
         self.enemy.moves[move].cast(self.hero)
         if self.hero.hp <= 0 and self.result is None:

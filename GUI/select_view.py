@@ -1,0 +1,132 @@
+import arcade
+from GUI import elements, game_view
+from game_logic import beings
+
+def make_label(text, font_size=14, bold=False, color=arcade.color.WHITE):
+    return arcade.gui.UILabel(
+        text=text, font_size=font_size, bold=bold,
+        text_color=color, font_name="Kenney Mini"
+    )
+
+class SelectView(arcade.View):
+    def __init__(self, return_view,map):
+        super().__init__()
+        self.manager = arcade.gui.UIManager()
+        self.return_view = return_view
+        self.names = ["Knight", "Wizard","Rogue","Berserker","Granny"]
+        self.current = 0
+        self.current_map = map
+        self.maps = [
+            arcade.load_texture(":res:desert_menu.png"),
+            arcade.load_texture(":res:forest_menu.png"),
+            arcade.load_texture(":res:dungeon_menu.png"),
+        ]
+        hero_sheet = arcade.load_spritesheet(":res:rogues.png")
+        texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
+        self.textures = [
+            texture_list_heroes[7].flip_left_right(),
+            texture_list_heroes[29].flip_left_right(),
+            texture_list_heroes[3].flip_left_right(),
+            texture_list_heroes[22].flip_left_right(),
+            texture_list_heroes[45].flip_left_right()
+            ]
+        self.build_ui()
+
+    def build_ui(self):
+        self.manager.clear()
+
+        layout = arcade.gui.UIBoxLayout(vertical=True, space_between=16)
+
+        # Name
+        self.title_label = make_label(
+            self.names[self.current].upper(),
+            font_size=22, bold=True, color=arcade.color.GOLD
+        )
+        layout.add(self.title_label)
+
+        # Scroll
+        selector_row = arcade.gui.UIBoxLayout(vertical=False, space_between=12)
+
+        btn_left = elements.MyButton(
+            text="",
+            texture=arcade.load_texture(":res:up.png").rotate_270(),
+            texture_hovered=arcade.load_texture(":res:up.png").rotate_270(),
+            texture_pressed=arcade.load_texture(":res:up.png").rotate_270(),
+            width=30, height=30, text_size=1
+        )
+        @btn_left.event("on_click")
+        def on_left(event, view=self):
+            view.current = (view.current - 1) % len(view.names)
+            self.build_ui()
+
+        icon = arcade.gui.UIImage(
+            texture=self.textures[self.current],
+            width=96, height=96
+        )
+
+        btn_right = elements.MyButton(
+            text="",
+            texture=arcade.load_texture(":res:up.png").rotate_90(),
+            texture_hovered=arcade.load_texture(":res:up.png").rotate_90(),
+            texture_pressed=arcade.load_texture(":res:up.png").rotate_90(),
+            width=30, height=30, text_size=1
+        )
+        @btn_right.event("on_click")
+        def on_right(event, view=self):
+            view.current = (view.current + 1) % len(view.names)
+            self.build_ui()
+
+        selector_row.add(btn_left)
+        selector_row.add(icon.with_border(width=2, color=arcade.color.GOLD))
+        selector_row.add(btn_right)
+        layout.add(selector_row)
+
+        # Btn
+        btn_confirm = elements.MyButton(
+            text="Continue",
+            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
+            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
+            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+            width=200, height=60, text_size=20
+        )
+        @btn_confirm.event("on_click")
+        def on_confirm(event,view=self):
+            hero = getattr(beings, self.names[self.current])()
+            self.window.show_view(game_view.GameView(map=self.current_map,hero = hero, 
+                                                     play_tex=self.textures[self.current]))
+            self.build_ui()
+        layout.add(btn_confirm)
+
+        self.widget = layout
+        anchor = self.manager.add(arcade.gui.UIAnchorLayout())
+        anchor.add(anchor_x="center_x", anchor_y="center_y", child=layout)
+
+    def on_show_view(self):
+        self.manager.enable()
+        self.build_ui()
+
+    def on_hide_view(self):
+        self.manager.disable()
+
+    def on_draw(self):
+        self.clear()
+        arcade.draw_texture_rect(self.maps[self.current_map],
+                                 arcade.LBWH(0, 0, self.window.width, self.window.height))
+    
+        r = self.widget.rect
+        padding = 30
+        arcade.draw_lrbt_rectangle_filled(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            (0, 0, 0, 180)
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            border_width=2, color=arcade.color.GOLD
+        )
+        self.manager.draw()
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            self.window.show_view(self.return_view)

@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 import random
-from game_logic import beings
+from game_logic import beings, moves
 
 
 app = FastAPI()
@@ -14,7 +14,6 @@ def home():
     next_id += 1
     monster_order = [1,2,3,4,5]
     random.shuffle(monster_order)
-    print(monster_order)
     roster = [beings.Witch(monster_order[0]),
               beings.Spider(monster_order[1]),
               beings.Dragon(monster_order[2]),
@@ -29,7 +28,7 @@ def home():
 
 
 @app.get("/user/1")
-def get_user(user_id: int, enemy_hp: float, enemy_atk: float, enemy_def: float, enemy_mag: float, 
+def get_user(enemy_hp: float, enemy_atk: float, enemy_def: float, enemy_mag: float,
              hero_hp: float, hero_atk: float, hero_def: float, hero_mag: float):
     num =random.randint(0,3)
     return {

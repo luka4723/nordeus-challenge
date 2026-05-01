@@ -1,6 +1,7 @@
 from game_logic import beings
 from game_logic import status_effects
 from game_logic import defs
+import random
 
 class Move:
     def __init__(self, caster: beings.Being):
@@ -95,7 +96,7 @@ class DarkPact(Move):
 
     def cast(self,target = None):
         self.caster.hp -= defs.DARKPACT_HEALTH_COST
-        self.caster.status_effects.append(status_effects.IncreaseMagic(self.caster,defs.DARKPACT_MAGIC_INC,defs.DARKPACT_LEN))
+        target.status_effects.append(status_effects.IncreaseMagic(target,defs.DARKPACT_MAGIC_INC,defs.DARKPACT_LEN))
 
 class Bite(Move):
     def __init__(self, caster):
@@ -248,3 +249,65 @@ class HexShield(Move):
     def cast(self,target = None):
         self.caster.status_effects.append(status_effects.IncreaseDefense(self.caster,defs.HEXSHIELD_DEFENSE_INC,defs.HEXSHIELD_LEN))
 
+class Hypnotize(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Type: Status Effect\n\nEnemy plays a random move.\nDuration: {defs.HYPNOTIZE_LEN}"
+        self.type.append("Status")
+
+    def cast(self,target = None):
+        target.status_effects.append(status_effects.Dizzy(target,0,defs.HYPNOTIZE_LEN))
+
+class ShatteredFlask(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Type: Magic/Status Effect\nDamage: {defs.SHATTEREDFLASK_DMG}\nEnemy loses {defs.SHATTEREDFLASK_POISON_DMG} after a move\nDuration: {defs.SHATTEREDFLASK_LEN}\nScales off MAG"
+        self.type.append("Status")
+        self.type.append("Magic")
+
+    def cast(self,target = None):
+        target.hp -= self.caster.magic*defs.SHATTEREDFLASK_DMG
+        target.status_effects.append(status_effects.Poison(target,defs.SHATTEREDFLASK_POISON_DMG,defs.SHATTEREDFLASK_LEN))
+    
+class Shanking(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Type: Physical/Status Effect\nDamage: {defs.SHANKING_DMG}\nEnemy loses {defs.SHANKING_BLEED_DMG} after a move\nDuration: {defs.SHANKING_LEN}\nScales off ATK, reduced by DEF"
+        self.type.append("Physical")
+        self.type.append("Status")
+    
+    def cast(self,target = None):
+        target.hp -= (self.caster.atk*defs.SLASH_DMG)/target.defense
+        target.status_effects.append(status_effects.Bleed(target,defs.SHANKING_BLEED_DMG,defs.SHANKING_LEN))
+    
+class DirtThrow(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Type: Status Effect\nStat: DEF/ATK\nIncrease: {defs.DIRTTHROW_DEF_INC}\nnDecrease: {defs.DIRTTHROW_ATK_DEC}\nDuration: {defs.DIRTTHROW_LEN}"
+
+    def cast(self,target = None):
+        target.status_effects.append(status_effects.DecreaseAtk(target,defs.DIRTTHROW_ATK_DEC,defs.DIRTTHROW_LEN))
+        self.caster.status_effects.append(status_effects.IncreaseDefense(self.caster,defs.DIRTTHROW_DEF_INC,defs.DIRTTHROW_LEN))
+
+class Bandages(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Type: Physical\nHeal: {defs.BANDAGES_HEAL}\n\nScales off ATK"
+        self.type.append("Heal")
+        
+
+    def cast(self,target = None):
+        self.caster.hp += defs.BANDAGES_HEAL*self.caster.atk
+        self.caster.hp = min(self.caster.hp,self.caster.max_hp)
+
+class RollingPin(Move):
+    def __init__(self, caster):
+        super().__init__(caster)
+        self.desc = f"Makes tasty pies"
+        self.type.append("Physical")
+
+    def cast(self,target = None):
+        if random.randint(1,100) < 15:
+            target.hp=-999
+
+# GD, you owe me

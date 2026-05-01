@@ -1,5 +1,6 @@
 from game_logic import beings
 import arcade
+import random
 
 class Effect:
     def __init__(self, carrier: beings.Being, value, duration):
@@ -110,3 +111,33 @@ class DecreaseMagic(StatEffect):
     def remove(self):
         self.carrier.magic += self.value
         self.flag = False       
+
+class TickEffect(Effect):
+    def __init__(self, carrier, value, duration):
+        super().__init__(carrier, value, duration)
+
+class Bleed(TickEffect):
+    def __init__(self, carrier, value, duration):
+        super().__init__(carrier, value, duration)
+        self.desc = f"{type(self.carrier).__name__} bled for {self.value/self.carrier.defense} HP"
+        self.tex = arcade.load_texture(":res:bleed.png")
+
+    def apply(self):
+        self.carrier.hp -= self.value/self.carrier.defense
+      
+class Poison(TickEffect):
+    def __init__(self, carrier, value, duration):
+        super().__init__(carrier, value, duration)
+        self.desc = f"{type(self.carrier).__name__} is sick. Lost {self.value} HP"
+        self.tex = arcade.load_texture(":res:poison.png")
+
+    def apply(self):
+        self.carrier.hp -= self.value
+
+class Dizzy(TickEffect):
+    def __init__(self, carrier, value, duration):
+        super().__init__(carrier, value, duration)
+        self.desc = f"{type(self.carrier).__name__} is dizzy."
+        self.tex = arcade.load_texture(":res:dizzy.png")
+
+        

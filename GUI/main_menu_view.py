@@ -3,7 +3,10 @@ from pathlib import Path
 import arcade.gui
 import GUI.elements as ui
 import GUI.game_view as game_view
+import GUI.select_view as select_view
 import random
+import json
+from game_logic import beings
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res",assets_path)
@@ -63,12 +66,25 @@ class MainMenuView(arcade.View):
 
         @enter_button.event("on_click")
         def on_click_switch_button(event):
-            self.window.show_view(game_view.GameView(self.current_map))
+            self.window.show_view(select_view.SelectView(map=self.current_map,return_view=self))
 
         @continue_button.event("on_click")
         def on_click_switch_button(event):
             if self.cont_avl:
-                self.window.show_view(game_view.GameView(self.current_map,from_save=True))
+                hero_sheet = arcade.load_spritesheet(":res:rogues.png")
+                texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
+                textures = {
+                    "Knight":texture_list_heroes[7].flip_left_right(),
+                    "Wizard":texture_list_heroes[29].flip_left_right(),
+                    "Rogue":texture_list_heroes[3].flip_left_right(),
+                    "Berserker":texture_list_heroes[22].flip_left_right(),
+                    "Granny":texture_list_heroes[45].flip_left_right()
+                }
+                with open(assets_path / "savefile.txt", "r") as f:
+                    save_dict = json.load(f)
+                    hero = beings.Hero.from_dict(save_dict["hero"])
+                f.close()
+                self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=textures[type(hero).__name__],hero=hero))
 
         @quit_button.event("on_click")
         def on_click_switch_button(event):
@@ -87,7 +103,6 @@ class MainMenuView(arcade.View):
             anchor_y="center_y",
             child=self.grid,
         )
-        
 
     def on_show_view(self):
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
