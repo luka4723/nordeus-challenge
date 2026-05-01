@@ -1,4 +1,5 @@
 from game_logic import beings
+import arcade
 
 class Effect:
     def __init__(self, carrier: beings.Being, value, duration):
@@ -6,6 +7,7 @@ class Effect:
         self.value = value
         self.carrier = carrier
         self.desc = "test"
+        self.tex = None
 
     def apply(self):
         pass
@@ -17,11 +19,13 @@ class StatEffect(Effect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.flag = None
+        self.apply()
 
 class IncreaseDefense(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Increased {type(self.carrier).__name__}'s DEF by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:defu.png")
 
     def apply(self):
         if self.flag is None:
@@ -36,6 +40,7 @@ class IncreaseAtk(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Increased {type(self.carrier).__name__}'s ATK by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:atku.png")
 
     def apply(self):
         if self.flag is None:
@@ -50,6 +55,7 @@ class IncreaseMagic(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Increased {type(self.carrier).__name__}'s MAG by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:magu.png")
 
     def apply(self):
         if self.flag is None:
@@ -64,6 +70,7 @@ class DecreaseDefense(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Decreased {type(self.carrier).__name__}'s DEF by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:defd.png")
 
     def apply(self):
         if self.flag is None:
@@ -78,6 +85,7 @@ class DecreaseAtk(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Decreased {type(self.carrier).__name__}'s ATK by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:atkd.png")
 
     def apply(self):
         if self.flag is None:
@@ -92,6 +100,7 @@ class DecreaseMagic(StatEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
         self.desc = f"Decreased {type(self.carrier).__name__}'s MAG by {self.value} \nfor {self.duration} moves"
+        self.tex = arcade.load_texture(":res:magd.png")
 
     def apply(self):
         if self.flag is None:

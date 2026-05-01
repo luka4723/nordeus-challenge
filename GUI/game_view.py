@@ -2,7 +2,9 @@ import arcade
 import arcade.gui
 from pathlib import Path
 import game_logic.client
+from game_logic import defs, beings
 from GUI import main_menu_view,moves_view,elements, battle_view
+import json
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res", assets_path)
@@ -17,21 +19,48 @@ def make_label(text, font_size=16, bold=False, color=arcade.color.WHITE):
     )
 
 class GameView(arcade.View):
-    def __init__(self):
+    def __init__(self, map, from_save=False):
         super().__init__()
         self.manager = arcade.gui.UIManager()
         arcade.load_font(":resources:/fonts/ttf/Kenney/Kenney_Mini.ttf")
 
-        self.current_floor = 0
-
         monster_sheet = arcade.load_spritesheet(":res:monsters.png")
         hero_sheet = arcade.load_spritesheet(":res:rogues.png")
+        tile_sheet = arcade.load_spritesheet(":res:tiles.png")
+        animal_sheet = arcade.load_spritesheet(":res:animals.png")
+
         texture_list = monster_sheet.get_texture_grid(size=(32, 32), columns=12, count=12 * 13)
         texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
+        self.current_map = map
+        self.widget = None
 
-        self.hero, self.enemies = game_logic.client.getState()
 
-        self.player_texture = texture_list_heroes[7]
+        if from_save:
+            with open(assets_path / "savefile.txt", "r") as f:
+                save_dict = json.load(f)
+                self.current_floor = save_dict["floor"]
+                self.hero = beings.Hero.from_dict(save_dict["hero"])
+                self.enemies = []
+                for enemy_data in save_dict["enemies"]:
+                    enemy = getattr(beings,enemy_data["type"])(enemy_data["order"] )   
+                    self.enemies.append(enemy)
+                self.current_map = save_dict["map"]
+        else:
+            self.hero, self.enemies = game_logic.client.getState()
+            self.current_floor = 0
+        
+        self.maps = [
+            arcade.load_texture(":res:desert_menu.png"),
+            arcade.load_texture(":res:forest_menu.png"),
+            arcade.load_texture(":res:dungeon_menu.png"),
+        ]
+        self.map_icons = [
+            animal_sheet.get_texture_grid(size=(32, 32), columns=9, count=9 * 16)[7*9+1],
+            tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[25*17+1],
+            tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[23*17]
+        ]
+
+        self.player_texture = texture_list_heroes[7].flip_left_right()
         
         self.enemy_textures = []
         enemy_dict = {
@@ -58,7 +87,7 @@ class GameView(arcade.View):
             texture=self.player_texture, width=64, height=64
         )
         hero_header.add(hero_img)
-        hero_header.add(make_label("HERO", font_size=16, bold=True, color=arcade.color.GOLD))
+        hero_header.add(make_label(type(self.hero).__name__.upper(), font_size=16, bold=True, color=arcade.color.GOLD))
         left_panel.add(hero_header)
 
         btns = []
@@ -78,11 +107,29 @@ class GameView(arcade.View):
                                                         enemy=self.enemies[self.current_floor],
                                                         hero_texture=self.player_texture,
                                                         enemy_texture=self.enemy_textures[self.current_floor],
-                                                        return_view=self
+                                                        return_view=self, map = self.current_map
                                                     ))
         @btns[1].event("on_click")
         def on_click_switch_button(event):
-            self.window.show_view(moves_view.MovesView(self.hero,self))
+            self.window.show_view(moves_view.MovesView(self.hero,self, map=self.current_map))
+        @btns[3].event("on_click")
+        def on_click_switch_button(event):
+            save_dict = {
+                "hero": self.hero.to_dict(),
+                "enemies": [
+                                {
+                                    "type": type(enemy).__name__,
+                                    "order": enemy.order
+                                }
+                                for enemy in self.enemies
+                            ],
+                "floor": self.current_floor,
+                "map" : self.current_map
+            }
+            with open(assets_path / "savefile.txt", "w") as f:
+                json.dump(save_dict,f,indent=4)
+            f.close
+
         @btns[4].event("on_click")
         def on_click_switch_button(event):
             self.window.show_view(main_menu_view.MainMenuView())
@@ -90,28 +137,45 @@ class GameView(arcade.View):
         #MIDDLE PANEL
         center_panel = arcade.gui.UIBoxLayout(vertical=True, space_between=20)
 
-        stats_title = make_label("STATS", font_size=20, color=arcade.color.LIGHT_GRAY)
+        stats_title = make_label("STATS", font_size=20, color=arcade.color.GOLD)
         center_panel.add(stats_title)
 
         stats_data = [
             ("Level", f"{self.hero.lvl}"),
             ("XP", f"{self.hero.xp} / {100+(self.hero.lvl-1)*20}"),
-            ("HP", f"{self.hero.hp} / {self.hero.max_hp}"),
+            ("HP", f"{round(self.hero.hp)} / {self.hero.max_hp}"),
             ("ATK", f"{self.hero.atk}"),
             ("DEF", f"{self.hero.defense}"),
             ("MAG", f"{self.hero.magic}"),
         ]
 
+        self.levelup_available = self.hero.xp >= 100 + (self.hero.lvl - 1) * 20
+
         stats_grid = arcade.gui.UIGridLayout(
-            column_count=2, row_count=len(stats_data),
-            horizontal_spacing=24, vertical_spacing=8
+            column_count=3, row_count=len(stats_data), 
+            horizontal_spacing=8, vertical_spacing=8
         )
         for i, (stat, val) in enumerate(stats_data):
             stats_grid.add(make_label(stat + ":", color=arcade.color.LIGHT_BLUE), column=0, row=i)
             stats_grid.add(make_label(val, bold=True), column=1, row=i)
+            
+            if self.levelup_available and stat in ("HP", "ATK", "DEF", "MAG"):
+                btn = elements.MyButton(
+                    text="",
+                    texture=arcade.load_texture(":res:up.png"), 
+                    texture_hovered=arcade.load_texture(":res:up.png"),
+                    texture_pressed=arcade.load_texture(":res:up.png"),
+                    width=30, height=30, text_size=16
+                )
+                @btn.event("on_click")
+                def on_stat_up(event, a=stat):
+                    self.upgrade_stat(a)
+                stats_grid.add(btn, column=2, row=i)
+            else:
+                stats_grid.add(arcade.gui.UIWidget(width=30, height=30), column=2, row=i)
         center_panel.add(stats_grid)
 
-        eq_title = make_label("EQUIPMENT", font_size=20, color=arcade.color.LIGHT_GRAY)
+        eq_title = make_label("EQUIPMENT", font_size=20, color=arcade.color.GOLD)
         center_panel.add(eq_title)
 
         eq_slots = [
@@ -167,18 +231,71 @@ class GameView(arcade.View):
         tower_content.add(player_col)
         tower_content.add(enemy_col)
         right_panel.add(tower_content)
+        
+        # Map selector
+        map_selector = arcade.gui.UIBoxLayout(vertical=False, space_between=8)
+
+        btn_left = elements.MyButton(
+            text="",
+            texture=arcade.load_texture(":res:up.png").rotate_270(),
+            texture_hovered=arcade.load_texture(":res:up.png").rotate_270(),
+            texture_pressed=arcade.load_texture(":res:up.png").rotate_270(),
+            width=30, height=30, text_size=1
+        )
+        @btn_left.event("on_click")
+        def on_left(event, view=self):
+            view.current_map = (view.current_map - 1) % len(view.maps)
+            view.build_ui()
+
+        self.map_preview = arcade.gui.UIImage(
+            texture=self.map_icons[self.current_map], width=64, height=64
+        )
+
+        btn_right = elements.MyButton(
+            text="",
+            texture=arcade.load_texture(":res:up.png").rotate_90(),
+            texture_hovered=arcade.load_texture(":res:up.png").rotate_90(),
+            texture_pressed=arcade.load_texture(":res:up.png").rotate_90(),
+            width=30, height=30, text_size=1
+        )
+        @btn_right.event("on_click")
+        def on_right(event, view=self):
+            view.current_map = (view.current_map + 1) % len(view.maps)
+            view.build_ui()
+
+        map_selector.add(btn_left)
+        map_selector.add(self.map_preview.with_border(width=2, color=arcade.color.GOLD))
+        map_selector.add(btn_right)
+
+        right_panel.add(map_selector)
 
         # MAIN
         main_row = arcade.gui.UIBoxLayout(vertical=False, space_between=96)
         main_row.add(left_panel)
         main_row.add(center_panel)
         main_row.add(right_panel)
+        self.widget = main_row
 
         anchor = self.manager.add(arcade.gui.UIAnchorLayout())
         anchor.add(anchor_x="center_x", anchor_y="center_y", child=main_row)
 
+    def upgrade_stat(self, stat):
+        self.hero.xp -= 100+(self.hero.lvl-1)*20
+        self.hero.lvl +=1        
+        
+        if stat == "HP":
+            self.hero.max_hp += defs.LVLUP_HP
+            self.hero.hp = self.hero.max_hp
+        elif stat == "ATK":
+            self.hero.atk += defs.LVLUP_ATK
+        elif stat == "DEF":
+            self.hero.defense += defs.LVLUP_DEFENSE
+        elif stat == "MAG":
+            self.hero.magic += defs.LVLUP_MAGIC
+        
+        self.build_ui()
+
     def on_show_view(self):
-        arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
         self.manager.enable()
         self.build_ui()
 
@@ -187,6 +304,20 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
+        arcade.draw_texture_rect(self.maps[self.current_map],
+                                 arcade.LBWH(0, 0, self.window.width, self.window.height))
+        r = self.widget.rect
+        padding = 20
+        arcade.draw_lrbt_rectangle_filled(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            (0, 0, 0, 160)
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            border_width=2, color=arcade.color.GOLD
+        )
         self.manager.draw()
 
         if self.current_floor in self.enemy_slots:

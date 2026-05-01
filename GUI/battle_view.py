@@ -23,7 +23,7 @@ def move_name(move):
 
 class BattleView(arcade.View):
     def __init__(self, hero: beings.Hero, enemy: beings.Foe,
-                 hero_texture, enemy_texture, return_view):
+                 hero_texture, enemy_texture, return_view, map):
         super().__init__()
         self.hero = hero
         self.enemy = enemy
@@ -35,7 +35,12 @@ class BattleView(arcade.View):
         self.log_panel = None
         self.battle_over = False
         self.enemy_maxhp = self.enemy.hp
-
+        self.current_map = map
+        self.maps = [
+            arcade.load_texture(":res:map_desert.png"),
+            arcade.load_texture(":res:map_forest.png"),
+            arcade.load_texture(":res:map_dungeon.png"),
+        ]
         self.hovered_move = None
         self.hover_start_time = 0
         self.hovered_button = None
@@ -46,6 +51,10 @@ class BattleView(arcade.View):
         self.event_label = make_label("", font_size=14, bold=False, color=arcade.color.WHITE)
         self.game = gamelogic.Encounter(self.hero,self.enemy)
 
+        self.hero_pos = (1280/2-64-200, 415)   
+        self.enemy_pos = (1280/2+200, 415)
+        self.char_size = 80
+
         self.build_ui()
 
     def build_ui(self):
@@ -53,32 +62,19 @@ class BattleView(arcade.View):
         
         if self.battle_over:
             if self.game.result:
+                for effect in self.hero.status_effects:
+                    effect.remove()
                 self.return_view.current_floor +=1
                 self.window.show_view(self.return_view)
             else:
                 self.window.show_view(main_menu_view.MainMenuView())
         main_anchor = self.manager.add(arcade.gui.UIAnchorLayout())
 
-        #Beings
-        hero_img = arcade.gui.UIImage(texture=self.hero_texture, width=128, height=128)
-        main_anchor.add(
-            child=hero_img, 
-            anchor_x="left", anchor_y="top",
-            align_x=80, align_y=-40
-        )
-
-        enemy_img = arcade.gui.UIImage(texture=self.enemy_texture, width=128, height=128)
-        main_anchor.add(
-            child=enemy_img, 
-            anchor_x="right", anchor_y="top",
-            align_x=-80, align_y=-40
-        )
-
         bottom_line = arcade.gui.UIBoxLayout(vertical=False, space_between=20)
         
         #Hero stats
         hero_stats_box = arcade.gui.UIBoxLayout(vertical=True, space_between=6)
-        hero_stats_box.add(make_label("HERO", font_size=22, bold=True, color=arcade.color.GOLD))
+        hero_stats_box.add(make_label(type(self.hero).__name__.upper(), font_size=22, bold=True, color=arcade.color.UA_BLUE))
 
         stats = [
             ("HP",  format_str(f"{max(0, int(self.hero.hp))} / {self.hero.max_hp}",width=7)),
@@ -98,7 +94,7 @@ class BattleView(arcade.View):
 
         #Enemy stats
         enemy_stats_box = arcade.gui.UIBoxLayout(vertical=True, space_between=6)
-        enemy_stats_box.add(make_label(str(self.enemy).upper(), font_size=22, bold=True, color=arcade.color.ORANGE_RED))
+        enemy_stats_box.add(make_label(str(self.enemy).upper(), font_size=22, bold=True, color=arcade.color.UA_RED))
         
         e_stats = [
             ("HP",  format_str(f"{max(0, int(self.enemy.hp))} / {self.enemy_maxhp}",width=7)),
@@ -212,7 +208,6 @@ class BattleView(arcade.View):
         self.build_ui()
 
     def on_show_view(self):
-        arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
         self.manager.enable()
 
     def on_hide_view(self):
@@ -220,7 +215,38 @@ class BattleView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        
+        arcade.draw_texture_rect(self.maps[self.current_map],
+                                 arcade.LBWH(0, 0, self.window.width, self.window.height))
+        icon_size = 32
+        icon_y = self.bottom_bar_height + 8
+        icon_padding = 4
+
+        # Hero
+        arcade.draw_texture_rect(
+            self.hero_texture,
+            arcade.LBWH(self.hero_pos[0], self.hero_pos[1], self.char_size, self.char_size)
+        )
+
+        # Enemy
+        arcade.draw_texture_rect(
+            self.enemy_texture,
+            arcade.LBWH(self.enemy_pos[0], self.enemy_pos[1], self.char_size, self.char_size)
+        )
+
+        for i, effect in enumerate(self.hero.status_effects):
+            icon_x = 10 + i * (icon_size + icon_padding)
+            arcade.draw_texture_rect(
+                effect.tex,
+                arcade.LBWH(icon_x, icon_y, icon_size, icon_size)
+            )
+
+        for i, effect in enumerate(self.enemy.status_effects):
+            icon_x = self.window.width - 10 - (i + 1) * (icon_size + icon_padding)
+            arcade.draw_texture_rect(
+                effect.tex,
+                arcade.LBWH(icon_x, icon_y, icon_size, icon_size)
+            )
+
         arcade.draw_lrbt_rectangle_filled(
             left=0, 
             right=self.window.width,
@@ -245,7 +271,7 @@ class BattleView(arcade.View):
 
             #Hero Actions
             arcade.draw_text("Hero Actions:", px + padding, py - padding - 16,
-                            arcade.color.GOLD, 16, font_name="Kenney Mini")
+                            arcade.color.UA_BLUE, 16, font_name="Kenney Mini")
             if self.event_label.text:
                 for i, line in enumerate(self.event_label.text.strip().split("\n")):
                     arcade.draw_text(line, px + padding, py - padding - 36 - i * 18,
@@ -254,7 +280,7 @@ class BattleView(arcade.View):
             #Enemy actions
             bottom_y = py - panel_height // 2
             arcade.draw_text("Enemy Actions:", px + padding, bottom_y - padding - 16,
-                            arcade.color.ORANGE_RED, 16, font_name="Kenney Mini")
+                            arcade.color.UA_RED, 16, font_name="Kenney Mini")
             if self.enemy_event_text:
                 for i, line in enumerate(self.enemy_event_text.strip().split("\n")):
                     arcade.draw_text(line, px + padding, bottom_y - padding - 36 - i * 18,

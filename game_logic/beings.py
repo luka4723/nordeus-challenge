@@ -8,6 +8,7 @@ class Being:
         self.atk = atk
         self.defense = defense
         self.magic = magic
+        self.max_hp = self.hp
         self.moves: list[moves.Move] = []
         self.status_effects: list[status_effects.Effect] = []
     
@@ -24,14 +25,53 @@ class Being:
         return f"{type(self).__name__}"
 
 class Hero(Being):
-    def __init__(self):
-        super().__init__(defs.HERO_HP, defs.HERO_ATK, defs.HERO_DEF, defs.HERO_MAGIC)
-        self.max_hp = defs.HERO_HP
+    def __init__(self,hp,atk,defense,magic):
+        super().__init__(hp,atk,defense,magic)
         self.xp = 0
         self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
-        self.available_moves.append(moves.DragonScales(self))
+
+    def to_dict(self):
+        return {
+                "type": type(self).__name__,         
+                "hp": self.hp,
+                "max_hp": self.max_hp,
+                "atk": self.atk,
+                "defense": self.defense,
+                "magic": self.magic,
+                "lvl": self.lvl,
+                "xp": self.xp,
+                "moves": [type(move).__name__ for move in self.moves],
+                "available_moves": [type(move).__name__ for move in self.available_moves]
+                }
+    @staticmethod
+    def from_dict(data):
+        hero = globals()[data["type"]]()
+        hero.hp = data["hp"]
+        hero.max_hp = data["max_hp"]
+        hero.atk = data["atk"]
+        hero.defense = data["defense"]
+        hero.magic = data["magic"]
+        hero.lvl = data["lvl"]
+        hero.xp = data["xp"]
+        hero.moves = [
+            getattr(moves, move)(hero)
+            for move in data["moves"]
+        ]
+        hero.available_moves = [
+            getattr(moves, move)(hero)
+            for move in data["available_moves"]
+        ]          
+        hero.status_effects = []     
+        return hero   
+
+class Knight(Hero):
+    def __init__(self):
+        super().__init__(defs.HERO_HP, defs.HERO_ATK, defs.HERO_DEF, defs.HERO_MAGIC)
+        self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
+        self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
+
 # Simulating higher levels each subsequent enemy
 class Foe(Being):
     def __init__(self, order, hp, atk, defense, magic):

@@ -13,7 +13,7 @@ window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 window.center_window()
 
 if __name__ == '__main__':
-    #current_win = gv.GameView()
-    current_win = mmv.MainMenuView()
+    current_win = gv.GameView(map=0)
+    #current_win = mmv.MainMenuView()
     window.show_view(current_win)
     arcade.run()

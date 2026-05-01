@@ -15,7 +15,7 @@ def move_name(move) -> str:
     return "".join(result)
 
 class MovesView(arcade.View):
-    def __init__(self, hero: beings.Hero, return_view):
+    def __init__(self, hero: beings.Hero, return_view, map):
         super().__init__()
         self.hero = hero
         #print(self.hero.moves)
@@ -27,8 +27,14 @@ class MovesView(arcade.View):
         self.hover_start_time = 0
         self.hovered_button = None
         self.tooltip_delay = 0.75
+        self.widget = None
         self.build_ui()
-
+        self.current_map = map
+        self.maps = [
+            arcade.load_texture(":res:desert_menu.png"),
+            arcade.load_texture(":res:forest_menu.png"),
+            arcade.load_texture(":res:dungeon_menu.png"),
+        ]
     def build_ui(self):
         self.manager.clear()
         self.hovered_move = None     
@@ -150,6 +156,7 @@ class MovesView(arcade.View):
             self.window.show_view(self.return_view)
 
         root.add(back_btn)
+        self.widget = root
 
         anchor = self.manager.add(arcade.gui.UIAnchorLayout())
         anchor.add(anchor_x="center_x", anchor_y="center_y", child=root)
@@ -163,6 +170,20 @@ class MovesView(arcade.View):
 
     def on_draw(self):
         self.clear()
+        arcade.draw_texture_rect(self.maps[self.current_map],
+                                 arcade.LBWH(0, 0, self.window.width, self.window.height))
+        r = self.widget.rect
+        padding = 20
+        arcade.draw_lrbt_rectangle_filled(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            (0, 0, 0, 160)
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            r.left - padding, r.right + padding,
+            r.bottom - padding, r.top + padding,
+            border_width=2, color=arcade.color.GOLD
+        )
         self.manager.draw()
 
         print(self.hovered_move)

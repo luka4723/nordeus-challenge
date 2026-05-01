@@ -13,7 +13,6 @@ class Encounter:
     def heroMove(self, move : moves.Move):
         move.cast(self.enemy)
         if self.enemy.hp <= 0:
-            self.hero.hp = self.hero.max_hp
             match self.enemy.order:
                 case 1:
                     xp = defs.XP_LVL1
@@ -27,11 +26,6 @@ class Encounter:
                     xp = defs.XP_LVL5
             
             self.hero.xp += xp
-            # MOVED TO GAME VIEW
-            # if self.hero.xp >= 100:
-            #     self.hero.xp -= 100
-            #     self.hero.lvl += 1
-            #     levelUp(self.hero)
 
             order = random.randint(0,3)
             if type(self.enemy.moves[order]) in [type(m) for m in self.hero.available_moves]:
@@ -90,22 +84,3 @@ class Encounter:
         if self.enemy.hp<=0 and self.result is None:
             self.result = True
 
-def levelUp(hero : beings.Hero):
-    print("You leveled up! Choose which stat to upgrade:")
-    print(f"1. HP")
-    print(f"2. ATK")
-    print(f"3. DEF")
-    print(f"4. MAG")
-
-    stat = int(input("> "))
-    print()
-    match stat:
-        case 1:
-            hero.max_hp += defs.LVLUP_HP
-            hero.hp = hero.max_hp
-        case 2:
-            hero.atk += defs.LVLUP_ATK
-        case 3:
-            hero.defense += defs.LVLUP_DEFENSE
-        case 4:
-            hero.magic += defs.LVLUP_MAGIC

@@ -55,6 +55,7 @@ class SecondWind(Move):
 
     def cast(self,target = None):
         self.caster.hp += defs.SECONDWIND_HEAL*self.caster.magic
+        self.caster.hp = min(self.caster.hp,self.caster.max_hp)
 
 class ShadowBolt(Move):
     def __init__(self, caster):
@@ -75,6 +76,7 @@ class DrainLife(Move):
     def cast(self,target = None):
         target.hp -= defs.DRAINLIFE_DMG*self.caster.magic
         self.caster.hp += defs.DRAINLIFE_DMG*self.caster.magic
+        self.caster.hp = min(self.caster.hp,self.caster.max_hp)
 
 class Curse(Move):
     def __init__(self, caster):
