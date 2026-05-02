@@ -140,6 +140,7 @@ HYPNOTIZE_LEN = 2
 # XP and gold per stage 
 XP = [150, 70, 90, 110, 130]
 GOLD = [100,100,100,100,100]
+PRICES = [60, 80, 100, 120, 140]
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res",assets_path)

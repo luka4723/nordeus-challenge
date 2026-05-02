@@ -3,8 +3,8 @@ import arcade.gui
 from pathlib import Path
 import game_logic.client
 from game_logic import defs, beings, equipment
-from GUI import main_menu_view,moves_view,elements, battle_view, equipment_view
-import json
+from GUI import main_menu_view,moves_view,elements, battle_view, equipment_view, shop_view
+import json, random
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res", assets_path)
@@ -24,7 +24,6 @@ class GameView(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.current_map = map
         self.widget = None
-
 
         if from_save:
             with open(assets_path / "savefile.txt", "r") as f:
@@ -46,6 +45,11 @@ class GameView(arcade.View):
         self.enemy_textures = []
         for enemy in self.enemies:
             self.enemy_textures.append(defs.BEING_SPRITES[f"{type(enemy).__name__}"])
+        
+        self.shop_items = [
+            (getattr(equipment, name.replace(" ", ""))(self.hero), defs.PRICES[random.randint(0, len(defs.PRICES)-1)])
+            for name in random.sample(list(defs.ITEMS.keys()), 9)
+        ]
         self.build_ui()
 
     def build_ui(self):
@@ -65,7 +69,7 @@ class GameView(arcade.View):
         left_panel.add(hero_header)
 
         btns = []
-        for btn_text in ["Start Fight", "Moves", "Equipment","Save","Back"]:
+        for btn_text in ["Start Fight", "Moves", "Equipment","Shop","Save","Back"]:
             btn = elements.MyButton(text=btn_text, 
                                     texture=defs.BTN_NORMAL_TEX,
                                     texture_hovered=defs.BTN_HOVERED_TEX,
@@ -90,8 +94,12 @@ class GameView(arcade.View):
         @btns[2].event("on_click")
         def on_click_switch_button(event):
             self.window.show_view(equipment_view.EquipmentView(map=self.current_map,hero=self.hero,return_view=self))
-
+        
         @btns[3].event("on_click")
+        def on_click_switch_button(event):
+            self.window.show_view(shop_view.ShopView(map=self.current_map,hero=self.hero,return_view=self,items=self.shop_items))
+
+        @btns[4].event("on_click")
         def on_click_switch_button(event):
             save_dict = {
                 "hero": self.hero.to_dict(),
@@ -109,7 +117,7 @@ class GameView(arcade.View):
                 json.dump(save_dict,f,indent=4)
             f.close
 
-        @btns[4].event("on_click")
+        @btns[5].event("on_click")
         def on_click_switch_button(event):
             self.window.show_view(main_menu_view.MainMenuView())
 
