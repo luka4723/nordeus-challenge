@@ -13,26 +13,8 @@ class Encounter:
     def heroMove(self, move : moves.Move):
         move.cast(self.enemy)
         if self.enemy.hp <= 0:
-            match self.enemy.order:
-                case 1:
-                    xp = defs.XP_LVL1
-                case 2:
-                    xp = defs.XP_LVL2
-                case 3:
-                    xp = defs.XP_LVL3
-                case 4:
-                    xp = defs.XP_LVL4
-                case 5:
-                    xp = defs.XP_LVL5
-            
-            self.hero.xp += xp
-
-            order = random.randint(0,3)
-            if type(self.enemy.moves[order]) in [type(m) for m in self.hero.available_moves]:
-                print("Nothing learned, tough luck!\n")
-            else:
-                print(f"Wow, you learned a new move: {type(self.enemy.moves[order]).__name__}.\n")
-                self.hero.available_moves.append(self.enemy.moves[order])
+            self.hero.xp += defs.XP[self.enemy.order+1]
+            self.hero.gold += defs.GOLD[self.enemy.order+1]
             self.result = True
             return True
 

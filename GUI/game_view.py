@@ -22,15 +22,6 @@ class GameView(arcade.View):
     def __init__(self, map, hero, play_tex,from_save=False):
         super().__init__()
         self.manager = arcade.gui.UIManager()
-        arcade.load_font(":resources:/fonts/ttf/Kenney/Kenney_Mini.ttf")
-
-        monster_sheet = arcade.load_spritesheet(":res:monsters.png")
-        hero_sheet = arcade.load_spritesheet(":res:rogues.png")
-        tile_sheet = arcade.load_spritesheet(":res:tiles.png")
-        animal_sheet = arcade.load_spritesheet(":res:animals.png")
-
-        texture_list = monster_sheet.get_texture_grid(size=(32, 32), columns=12, count=12 * 13)
-        texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
         self.current_map = map
         self.widget = None
 
@@ -50,30 +41,15 @@ class GameView(arcade.View):
             self.enemies = game_logic.client.getState()
             self.current_floor = 0
         
-        self.maps = [
-            arcade.load_texture(":res:desert_menu.png"),
-            arcade.load_texture(":res:forest_menu.png"),
-            arcade.load_texture(":res:dungeon_menu.png"),
-        ]
-        self.map_icons = [
-            animal_sheet.get_texture_grid(size=(32, 32), columns=9, count=9 * 16)[7*9+1],
-            tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[25*17+1],
-            tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[23*17]
-        ]
 
+        self.up_icon = arcade.load_texture(":res:up.png")
+        self.right_icon = self.up_icon.rotate_90()
+        self.left_icon = self.up_icon.rotate_270()
         self.player_texture = play_tex
         
         self.enemy_textures = []
-        enemy_dict = {
-            "Witch" : texture_list[64],
-            "Dragon": texture_list[98],
-            "Spider": texture_list[80],
-            "Warrior": texture_list[7],
-            "Mage": texture_list[6]
-        }
-
         for enemy in self.enemies:
-            self.enemy_textures.append(enemy_dict[f"{type(enemy).__name__}"])
+            self.enemy_textures.append(defs.BEING_SPRITES[f"{type(enemy).__name__}"])
         self.build_ui()
 
     def build_ui(self):
@@ -95,10 +71,10 @@ class GameView(arcade.View):
         btns = []
         for btn_text in ["Start Fight", "Moves", "Equipment","Save","Back"]:
             btn = elements.MyButton(text=btn_text, 
-                              texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                              texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                              texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                              width=200, height=60, text_size=20)
+                                    texture=defs.BTN_NORMAL_TEX,
+                                    texture_hovered=defs.BTN_HOVERED_TEX,
+                                    texture_pressed=defs.BTN_PRESSED_TEX,
+                                    width=200, height=60, text_size=20)
             btns.append(btn)
             left_panel.add(btn)
         
@@ -164,9 +140,9 @@ class GameView(arcade.View):
             if self.levelup_available and stat in ("HP", "ATK", "DEF", "MAG"):
                 btn = elements.MyButton(
                     text="",
-                    texture=arcade.load_texture(":res:up.png"), 
-                    texture_hovered=arcade.load_texture(":res:up.png"),
-                    texture_pressed=arcade.load_texture(":res:up.png"),
+                    texture=self.up_icon, 
+                    texture_hovered=self.up_icon,
+                    texture_pressed=self.up_icon,
                     width=30, height=30, text_size=16
                 )
                 @btn.event("on_click")
@@ -239,30 +215,30 @@ class GameView(arcade.View):
 
         btn_left = elements.MyButton(
             text="",
-            texture=arcade.load_texture(":res:up.png").rotate_270(),
-            texture_hovered=arcade.load_texture(":res:up.png").rotate_270(),
-            texture_pressed=arcade.load_texture(":res:up.png").rotate_270(),
+            texture=self.left_icon,
+            texture_hovered=self.left_icon,
+            texture_pressed=self.left_icon,
             width=30, height=30, text_size=1
         )
         @btn_left.event("on_click")
         def on_left(event, view=self):
-            view.current_map = (view.current_map - 1) % len(view.maps)
+            view.current_map = (view.current_map - 1) % len(defs.MAP_IMGS)
             view.build_ui()
 
         self.map_preview = arcade.gui.UIImage(
-            texture=self.map_icons[self.current_map], width=64, height=64
+            texture=defs.MAP_ICONS[self.current_map], width=64, height=64
         )
 
         btn_right = elements.MyButton(
             text="",
-            texture=arcade.load_texture(":res:up.png").rotate_90(),
-            texture_hovered=arcade.load_texture(":res:up.png").rotate_90(),
-            texture_pressed=arcade.load_texture(":res:up.png").rotate_90(),
+            texture=self.right_icon,
+            texture_hovered=self.right_icon,
+            texture_pressed=self.right_icon,
             width=30, height=30, text_size=1
         )
         @btn_right.event("on_click")
         def on_right(event, view=self):
-            view.current_map = (view.current_map + 1) % len(view.maps)
+            view.current_map = (view.current_map + 1) % len(defs.MAP_IMGS)
             view.build_ui()
 
         map_selector.add(btn_left)
@@ -306,7 +282,7 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.maps[self.current_map],
+        arcade.draw_texture_rect(defs.MAP_IMGS[self.current_map],
                                  arcade.LBWH(0, 0, self.window.width, self.window.height))
         r = self.widget.rect
         padding = 20

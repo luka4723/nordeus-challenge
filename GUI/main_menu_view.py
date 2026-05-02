@@ -6,7 +6,7 @@ import GUI.game_view as game_view
 import GUI.select_view as select_view
 import random
 import json
-from game_logic import beings
+from game_logic import beings, defs
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res",assets_path)
@@ -24,34 +24,34 @@ class MainMenuView(arcade.View):
         self.cont_avl = save_path.stat().st_size > 0
 
         enter_button = ui.MyButton(text="New Game",
-                                         texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                                         texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                                         texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                                         texture=defs.BTN_NORMAL_TEX,
+                                         texture_hovered=defs.BTN_HOVERED_TEX,
+                                         texture_pressed=defs.BTN_PRESSED_TEX,
                                          width=200,
                                          height=60,
                                          text_size=26)
         
         if self.cont_avl:
             continue_button = ui.MyButton(text="Continue",
-                                            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                                            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                                            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                                            texture=defs.BTN_NORMAL_TEX,
+                                            texture_hovered=defs.BTN_HOVERED_TEX,
+                                            texture_pressed=defs.BTN_PRESSED_TEX,
                                             width=200,
                                             height=60,
                                             text_size=26)
         else:
             continue_button = ui.MyButton(text="Continue",
-                                            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                                            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                                            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                                            texture=defs.BTN_PRESSED_TEX,
+                                            texture_hovered=defs.BTN_PRESSED_TEX,
+                                            texture_pressed=defs.BTN_PRESSED_TEX,
                                             width=200,
                                             height=60,
                                             text_size=26)
 
         quit_button = ui.MyButton(text="Quit",
-                                         texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                                         texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                                         texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                                         texture=defs.BTN_NORMAL_TEX,
+                                         texture_hovered=defs.BTN_HOVERED_TEX,
+                                         texture_pressed=defs.BTN_PRESSED_TEX,
                                          width=200,
                                          height=60,
                                          text_size=26
@@ -71,31 +71,17 @@ class MainMenuView(arcade.View):
         @continue_button.event("on_click")
         def on_click_switch_button(event):
             if self.cont_avl:
-                hero_sheet = arcade.load_spritesheet(":res:rogues.png")
-                texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
-                textures = {
-                    "Knight":texture_list_heroes[7].flip_left_right(),
-                    "Wizard":texture_list_heroes[29].flip_left_right(),
-                    "Rogue":texture_list_heroes[3].flip_left_right(),
-                    "Berserker":texture_list_heroes[22].flip_left_right(),
-                    "Granny":texture_list_heroes[45].flip_left_right()
-                }
                 with open(assets_path / "savefile.txt", "r") as f:
                     save_dict = json.load(f)
                     hero = beings.Hero.from_dict(save_dict["hero"])
                 f.close()
-                self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=textures[type(hero).__name__],hero=hero))
+                self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=defs.BEING_SPRITES[type(hero).__name__],hero=hero))
 
         @quit_button.event("on_click")
         def on_click_switch_button(event):
             arcade.exit()
 
         self.current_map = random.randint(0,2)
-        self.maps = [
-            arcade.load_texture(":res:desert_menu.png"),
-            arcade.load_texture(":res:forest_menu.png"),
-            arcade.load_texture(":res:dungeon_menu.png"),
-        ]
 
         self.anchor = self.manager.add(arcade.gui.UIAnchorLayout())
         self.anchor.add(
@@ -113,7 +99,7 @@ class MainMenuView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.maps[self.current_map],
+        arcade.draw_texture_rect(defs.MAP_IMGS[self.current_map],
                                  arcade.LBWH(0, 0, self.window.width, self.window.height))
         r = self.grid.rect
         padding = 20
@@ -127,4 +113,9 @@ class MainMenuView(arcade.View):
             r.bottom - padding, r.top + padding,
             border_width=2, color=arcade.color.GOLD
         )
+
         self.manager.draw()
+        
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            arcade.exit()

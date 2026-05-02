@@ -28,9 +28,11 @@ class Hero(Being):
     def __init__(self,hp,atk,defense,magic):
         super().__init__(hp,atk,defense,magic)
         self.xp = 0
+        self.gold = 0
         self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
+        self.equipment = []
 
     def to_dict(self):
         return {
@@ -42,6 +44,7 @@ class Hero(Being):
                 "magic": self.magic,
                 "lvl": self.lvl,
                 "xp": self.xp,
+                "gold": self.gold,
                 "moves": [type(move).__name__ for move in self.moves],
                 "available_moves": [type(move).__name__ for move in self.available_moves]
                 }
@@ -55,6 +58,7 @@ class Hero(Being):
         hero.magic = data["magic"]
         hero.lvl = data["lvl"]
         hero.xp = data["xp"]
+        hero.gold = data["gold"]
         hero.moves = [
             getattr(moves, move)(hero)
             for move in data["moves"]

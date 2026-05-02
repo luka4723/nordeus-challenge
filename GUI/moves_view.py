@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 import game_logic.moves as moves
 from GUI import elements
-from game_logic import beings
+from game_logic import beings, defs
 import time
 
 def move_name(move) -> str:
@@ -30,11 +30,7 @@ class MovesView(arcade.View):
         self.widget = None
         self.build_ui()
         self.current_map = map
-        self.maps = [
-            arcade.load_texture(":res:desert_menu.png"),
-            arcade.load_texture(":res:forest_menu.png"),
-            arcade.load_texture(":res:dungeon_menu.png"),
-        ]
+
     def build_ui(self):
         self.manager.clear()
         self.hovered_move = None     
@@ -58,17 +54,17 @@ class MovesView(arcade.View):
             if is_selected:
                 btn = elements.MyButton(
                     text=move_name(move),
-                    texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                    texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                    texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                    texture=defs.BTN_PRESSED_TEX,
+                    texture_hovered=defs.BTN_PRESSED_TEX,
+                    texture_pressed=defs.BTN_PRESSED_TEX,
                     width=170, height=50, text_size=17, parent_win=self
                 )
             else:
                 btn = elements.MyButton(text=move_name(move), 
-                            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                            width=170, height=50, text_size=17, parent_win=self)
+                                        texture=defs.BTN_NORMAL_TEX,
+                                        texture_hovered=defs.BTN_HOVERED_TEX,
+                                        texture_pressed=defs.BTN_PRESSED_TEX,
+                                        width=170, height=50, text_size=17, parent_win=self)
             btn.move = move
 
             idx = i 
@@ -112,17 +108,17 @@ class MovesView(arcade.View):
             if is_selected:
                 btn = elements.MyButton(
                     text=move_name(move),
-                    texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                    texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                    texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                    texture=defs.BTN_PRESSED_TEX,
+                    texture_hovered=defs.BTN_PRESSED_TEX,
+                    texture_pressed=defs.BTN_PRESSED_TEX,
                     width=170, height=50, text_size=17, parent_win=self
                 )
             else:
                 btn = elements.MyButton(text=move_name(move), 
-                            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                            width=170, height=50, text_size=17, parent_win=self)
+                                        texture=defs.BTN_NORMAL_TEX,
+                                        texture_hovered=defs.BTN_HOVERED_TEX,
+                                        texture_pressed=defs.BTN_PRESSED_TEX,
+                                        width=170, height=50, text_size=17, parent_win=self)
             
             btn.move = move
                 
@@ -146,10 +142,10 @@ class MovesView(arcade.View):
 
         # Button
         back_btn = elements.MyButton(text="Back", 
-                            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
-                             width=200, height=60, text_size=20)
+                                     texture=defs.BTN_NORMAL_TEX,
+                                     texture_hovered=defs.BTN_HOVERED_TEX,
+                                     texture_pressed=defs.BTN_PRESSED_TEX,
+                                     width=200, height=60, text_size=20)
 
         @back_btn.event("on_click")
         def on_click_switch_button(event):
@@ -170,7 +166,7 @@ class MovesView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.maps[self.current_map],
+        arcade.draw_texture_rect(defs.MAP_IMGS[self.current_map],
                                  arcade.LBWH(0, 0, self.window.width, self.window.height))
         r = self.widget.rect
         padding = 20

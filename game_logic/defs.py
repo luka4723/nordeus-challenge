@@ -1,3 +1,5 @@
+import arcade
+from pathlib import Path
 
 #Knight base stats
 KNIGHT_HP = 300
@@ -135,10 +137,91 @@ SHATTEREDFLASK_LEN = 2
 
 HYPNOTIZE_LEN = 2
 
+# XP and gold per stage 
+XP = [150, 70, 90, 110, 130]
+GOLD = [100,100,100,100,100]
 
-# XP per stage
-XP_LVL1 = 150
-XP_LVL2 = 70
-XP_LVL3 = 90
-XP_LVL4 = 110
-XP_LVL5 = 130
+assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
+arcade.resources.add_resource_handle("res",assets_path)
+arcade.load_font(":resources:/fonts/ttf/Kenney/Kenney_Mini.ttf")
+
+BTN_NORMAL_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png")
+BTN_HOVERED_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png")
+BTN_PRESSED_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png")
+
+monster_sheet = arcade.load_spritesheet(":res:monsters.png")
+item_sheet = arcade.load_spritesheet(":res:items.png")
+hero_sheet = arcade.load_spritesheet(":res:rogues.png")
+tile_sheet = arcade.load_spritesheet(":res:tiles.png")
+animal_sheet = arcade.load_spritesheet(":res:animals.png")
+
+MAP_ICONS = [
+    animal_sheet.get_texture_grid(size=(32, 32), columns=9, count=9 * 16)[7*9+1],
+    tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[25*17+1],
+    tile_sheet.get_texture_grid(size=(32, 32), columns=17, count=17 * 26)[23*17]
+]
+
+GOLD_ICON = arcade.load_texture(":res:gold.png")
+
+MAP_IMGS = [
+    arcade.load_texture(":res:desert_menu.png"),
+    arcade.load_texture(":res:forest_menu.png"),
+    arcade.load_texture(":res:dungeon_menu.png"),
+]
+
+texture_list = monster_sheet.get_texture_grid(size=(32, 32), columns=12, count=12 * 13)
+texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
+texture_list_item = item_sheet.get_texture_grid(size=(32, 32), columns=11, count=11 * 26)
+
+BEING_SPRITES = {
+    "Knight":texture_list_heroes[7].flip_left_right(),
+    "Wizard":texture_list_heroes[29].flip_left_right(),
+    "Rogue":texture_list_heroes[3].flip_left_right(),
+    "Berserker":texture_list_heroes[22].flip_left_right(),
+    "Granny":texture_list_heroes[45].flip_left_right(),
+    "Witch" : texture_list[64],
+    "Dragon": texture_list[98],
+    "Spider": texture_list[80],
+    "Warrior": texture_list[7],
+    "Mage": texture_list[6]
+}
+
+ITEMS = {
+    "The Crucible": [texture_list_item[9],"atk",5],
+    "Viper Edge": [texture_list_item[16],"atk",5],
+    "Hallebarde": [texture_list_item[35],"atk",5],
+    "Crusher": [texture_list_item[48],"atk",5],
+    "Morning Star": [texture_list_item[56],"atk",5],
+    "Flail": [texture_list_item[78],"atk",5],
+    "Trident": [texture_list_item[69],"atk",5],
+    "Bow": [texture_list_item[102],"atk",5],
+    "Orb Staff": [texture_list_item[110],"magic",5],
+    "Arcane Branch": [texture_list_item[112],"magic",5],
+    "Walking Stick": [texture_list_item[119],"atk",5],
+
+    "Buckler": [texture_list_item[126],"defense",5],
+    "Kite Shield": [texture_list_item[127],"defense",5],
+    "Heater Shield": [texture_list_item[123],"defense",5],
+
+    "Plated Armor": [texture_list_item[137],"defense",5],
+    "Arcane Robe": [texture_list_item[134],"magic",5],
+    "Tunic": [texture_list_item[132],"defense",5],
+
+    "Bracers": [texture_list_item[146],"defense",5],
+    "Arcane Gloves": [texture_list_item[145],"magic",5],
+    "Leather Gloves": [texture_list_item[144],"defense",5],
+
+    "Greaves": [texture_list_item[157],"defense",5],
+    "Arcane Boots": [texture_list_item[156],"magic",5],
+    "Leather Boots": [texture_list_item[155],"defense",5],
+
+    "Iron Helmet": [texture_list_item[171],"defense",5],
+    "Arcane Hat": [texture_list_item[167],"magic",5],
+    "Cowl": [texture_list_item[168],"defense",5],
+
+    "Arcane Ring": [texture_list_item[190],"magic",5],
+    "Scroll Of Wit": [texture_list_item[237],"magic",5],
+    "Amulet": [texture_list_item[178],"defense",5]
+}
+
+del texture_list, texture_list_heroes, hero_sheet,tile_sheet, animal_sheet, monster_sheet, item_sheet, texture_list_item

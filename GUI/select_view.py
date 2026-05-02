@@ -1,6 +1,6 @@
 import arcade
 from GUI import elements, game_view
-from game_logic import beings
+from game_logic import beings,defs
 
 def make_label(text, font_size=14, bold=False, color=arcade.color.WHITE):
     return arcade.gui.UILabel(
@@ -16,25 +16,10 @@ class SelectView(arcade.View):
         self.names = ["Knight", "Wizard","Rogue","Berserker","Granny"]
         self.current = 0
         self.current_map = map
-        self.maps = [
-            arcade.load_texture(":res:desert_menu.png"),
-            arcade.load_texture(":res:forest_menu.png"),
-            arcade.load_texture(":res:dungeon_menu.png"),
-        ]
-        hero_sheet = arcade.load_spritesheet(":res:rogues.png")
-        texture_list_heroes = hero_sheet.get_texture_grid(size=(32, 32), columns=7, count=7 * 7)
-        self.textures = [
-            texture_list_heroes[7].flip_left_right(),
-            texture_list_heroes[29].flip_left_right(),
-            texture_list_heroes[3].flip_left_right(),
-            texture_list_heroes[22].flip_left_right(),
-            texture_list_heroes[45].flip_left_right()
-            ]
         self.build_ui()
 
     def build_ui(self):
         self.manager.clear()
-
         layout = arcade.gui.UIBoxLayout(vertical=True, space_between=16)
 
         # Name
@@ -60,7 +45,7 @@ class SelectView(arcade.View):
             self.build_ui()
 
         icon = arcade.gui.UIImage(
-            texture=self.textures[self.current],
+            texture=defs.BEING_SPRITES[self.names[self.current]],
             width=96, height=96
         )
 
@@ -84,16 +69,16 @@ class SelectView(arcade.View):
         # Btn
         btn_confirm = elements.MyButton(
             text="Continue",
-            texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-            texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-            texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+            texture=defs.BTN_NORMAL_TEX,
+            texture_hovered=defs.BTN_HOVERED_TEX,
+            texture_pressed=defs.BTN_PRESSED_TEX,
             width=200, height=60, text_size=20
         )
         @btn_confirm.event("on_click")
         def on_confirm(event,view=self):
             hero = getattr(beings, self.names[self.current])()
             self.window.show_view(game_view.GameView(map=self.current_map,hero = hero, 
-                                                     play_tex=self.textures[self.current]))
+                                                     play_tex=defs.BEING_SPRITES[self.names[self.current]]))
             self.build_ui()
         layout.add(btn_confirm)
 
@@ -110,7 +95,7 @@ class SelectView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.maps[self.current_map],
+        arcade.draw_texture_rect(defs.MAP_IMGS[self.current_map],
                                  arcade.LBWH(0, 0, self.window.width, self.window.height))
     
         r = self.widget.rect

@@ -1,7 +1,7 @@
 import arcade
 import arcade.gui
-from game_logic import beings, gamelogic, moves, status_effects
-from GUI import elements, main_menu_view
+from game_logic import beings, gamelogic, moves, status_effects, defs, equipment
+from GUI import elements, main_menu_view, victory_view, defeat_view
 import time, random
 
 def format_str(val, width=6):
@@ -65,9 +65,28 @@ class BattleView(arcade.View):
                 for effect in self.hero.status_effects:
                     effect.remove()
                 self.return_view.current_floor +=1
-                self.window.show_view(self.return_view)
+                order = random.randint(0,3)
+                move = None
+                if type(self.enemy.moves[order]) in [type(m) for m in self.hero.available_moves]:
+                    pass
+                else:
+                    self.hero.available_moves.append(self.enemy.moves[order])
+                    move = self.enemy.moves[order]
+
+                eq = None
+                rand_eq = random.choice(list(defs.ITEMS.keys())).replace(" ", "")
+                rand_eq = getattr(equipment, rand_eq)(self.hero)
+                if rand_eq not in self.hero.equipment:
+                    eq = rand_eq
+                self.window.show_view(victory_view.VictoryView(xp_gained=defs.XP[self.enemy.order],
+                                                                   gold_gained=defs.GOLD[self.enemy.order],
+                                                                   move_learned=move_name(move),
+                                                                   equipment_found=eq,
+                                                                   map=self.current_map,
+                                                                   return_view=self.return_view,
+                                                                   enemy_name=type(self.enemy).__name__))
             else:
-                self.window.show_view(main_menu_view.MainMenuView())
+                self.window.show_view(defeat_view.DefeatView(map=self.current_map,enemy_name=type(self.enemy).__name__))
         main_anchor = self.manager.add(arcade.gui.UIAnchorLayout())
 
         bottom_line = arcade.gui.UIBoxLayout(vertical=False, space_between=20)
@@ -118,9 +137,9 @@ class BattleView(arcade.View):
             for i, move in enumerate(self.hero.moves):
                 btn = elements.MyButton(
                     text=move_name(move),
-                    texture=arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png"),
-                    texture_hovered=arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png"),
-                    texture_pressed=arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png"),
+                    texture=defs.BTN_NORMAL_TEX,
+                    texture_hovered=defs.BTN_HOVERED_TEX,
+                    texture_pressed=defs.BTN_PRESSED_TEX,
                     width=150, height=40, text_size=14, parent_win=self
                 )
                 btn.move = move
