@@ -47,8 +47,10 @@ class EquipmentView(arcade.View):
             active = self.get_active(slot_type)
             if active is not None:
                 items = self.items_for_slot(slot_type)
-                if active in items:
-                    self.scroll_index[slot_name] = items.index(active) + 1
+                for j, item in enumerate(items):
+                    if type(item) == type(active):
+                        self.scroll_index[slot_name] = j + 1
+                        break
 
         self.build_ui()
 

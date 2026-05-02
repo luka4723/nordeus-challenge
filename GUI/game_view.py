@@ -3,8 +3,8 @@ import arcade.gui
 from pathlib import Path
 import game_logic.client
 from game_logic import defs, beings, equipment
-from GUI import main_menu_view,moves_view,elements, battle_view, equipment_view, shop_view
-import json, random
+from GUI import main_menu_view,moves_view,elements, battle_view, equipment_view, shop_view, end_view
+import json, random, time
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
 arcade.resources.add_resource_handle("res", assets_path)
@@ -24,22 +24,27 @@ class GameView(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.current_map = map
         self.widget = None
+        self.start_time = time.time()
+        self.paused_duration = 0
 
         if from_save:
             with open(assets_path / "savefile.txt", "r") as f:
                 save_dict = json.load(f)
                 self.current_floor = save_dict["floor"]
+                self.temp_floor = save_dict["temp_floor"]
                 self.hero = beings.Hero.from_dict(save_dict["hero"])
                 self.enemies = []
                 for enemy_data in save_dict["enemies"]:
                     enemy = getattr(beings,enemy_data["type"])(enemy_data["order"] )   
                     self.enemies.append(enemy)
                 self.current_map = save_dict["map"]
+                self.start_time = save_dict["start_time"]
+                self.paused_duration = save_dict["paused_duration"] + (time.time() - save_dict["pause_start"])
         else:
             self.hero = hero
             self.enemies = game_logic.client.getState()
             self.current_floor = 0
-        
+            self.temp_floor = self.current_floor
         self.player_texture = play_tex
         
         self.enemy_textures = []
@@ -49,7 +54,7 @@ class GameView(arcade.View):
         self.shop_items = [
             (getattr(equipment, name.replace(" ", ""))(self.hero), defs.PRICES[random.randint(0, len(defs.PRICES)-1)])
             for name in random.sample(list(defs.ITEMS.keys()), 9)
-        ]
+        ]   
         self.build_ui()
 
     def build_ui(self):
@@ -57,6 +62,8 @@ class GameView(arcade.View):
         self.enemy_slots = {}
         self.player_slot = None
 
+        if self.current_floor == 5:
+            self.window.show_view(end_view.EndView(map=self.current_map,time= self.start_time + self.paused_duration))
         #LEFT PANEL
         left_panel = arcade.gui.UIBoxLayout(vertical=True, space_between=20)
 
@@ -82,9 +89,9 @@ class GameView(arcade.View):
         def on_click_switch_button(event):
             self.window.show_view(battle_view.BattleView(
                                                         hero=self.hero,
-                                                        enemy=self.enemies[self.current_floor],
+                                                        enemy=self.enemies[self.temp_floor],
                                                         hero_texture=self.player_texture,
-                                                        enemy_texture=self.enemy_textures[self.current_floor],
+                                                        enemy_texture=self.enemy_textures[self.temp_floor],
                                                         return_view=self, map = self.current_map
                                                     ))
         @btns[1].event("on_click")
@@ -111,7 +118,11 @@ class GameView(arcade.View):
                                 for enemy in self.enemies
                             ],
                 "floor": self.current_floor,
-                "map" : self.current_map
+                "temp_floor": self.temp_floor,
+                "map" : self.current_map,
+                "start_time": self.start_time,
+                "paused_duration": self.paused_duration,
+                "pause_start": time.time()
             }
             with open(assets_path / "savefile.txt", "w") as f:
                 json.dump(save_dict,f,indent=4)
@@ -185,10 +196,11 @@ class GameView(arcade.View):
             has = False
             for eq in self.hero.active_equipment:
                 if isinstance(eq, getattr(equipment,slot)):
-                    has = True
+                    has = eq
+                    break
             if has:
                 eq_grid.add(arcade.gui.UIImage(
-                texture=eq.tex, width=32, height=32
+                texture=has.tex, width=32, height=32
             ), column=1, row=i)
             else:
                 eq_grid.add(arcade.gui.UIImage(
@@ -207,7 +219,7 @@ class GameView(arcade.View):
         )
         for i in range(5):
             floor = 4 - i
-            if floor == self.current_floor:
+            if floor == self.temp_floor:
                 img = arcade.gui.UIImage(
                     texture=self.player_texture, width=80, height=80
                 )
@@ -221,11 +233,20 @@ class GameView(arcade.View):
         )
         for i in range(5):
             floor = 4 - i
-            img = arcade.gui.UIImage(
-                texture=self.enemy_textures[floor], width=80, height=80
+            btn = elements.MyButton(
+                text="",
+                texture=self.enemy_textures[floor],
+                texture_hovered=self.enemy_textures[floor],
+                texture_pressed=self.enemy_textures[floor],
+                width=80, height=80, text_size=1
             )
-            self.enemy_slots[floor] = img
-            enemy_col.add(img, column=0, row=i)
+            @btn.event("on_click")
+            def on_enemy_click(event, f=floor):
+                if floor < self.current_floor:
+                    self.temp_floor = f
+                    self.build_ui()
+            self.enemy_slots[floor] = btn
+            enemy_col.add(btn, column=0, row=i)
 
         tower_content.add(player_col)
         tower_content.add(enemy_col)
@@ -318,13 +339,19 @@ class GameView(arcade.View):
             border_width=2, color=arcade.color.GOLD
         )
         self.manager.draw()
-
-        if self.current_floor in self.enemy_slots:
-            r = self.enemy_slots[self.current_floor].rect
-            arcade.draw_lbwh_rectangle_outline(
-                r.left, r.bottom, r.width, r.height,
-                color=arcade.color.DARK_RED, border_width=3
-            )
+        
+        for floor, slot in self.enemy_slots.items():
+            r = slot.rect
+            if floor == self.current_floor:
+                arcade.draw_lbwh_rectangle_outline(
+                    r.left, r.bottom, r.width, r.height,
+                    color=arcade.color.DARK_RED, border_width=3
+                )
+            elif floor < self.current_floor:
+                arcade.draw_lbwh_rectangle_outline(
+                    r.left, r.bottom, r.width, r.height,
+                    color=arcade.color.DARK_GREEN, border_width=3
+                )
 
         if self.player_slot:
             r = self.player_slot.rect

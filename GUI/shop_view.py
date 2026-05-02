@@ -153,10 +153,10 @@ class ShopView(arcade.View):
         @btn_done.event("on_click")
         def on_done(event, view=self):
             while len(self.items) < 9:
-                eq = getattr(equipment, random.sample(list(defs.ITEMS.keys())).replace(" ", ""))(self.return_view.hero)
+                eq = getattr(equipment, random.choice(list(defs.ITEMS.keys())).replace(" ", ""))(self.return_view.hero)
                 
                 while eq in self.return_view.hero.available_equipment and self.return_view.hero.available_equipment<len(defs.ITEMS.keys()):
-                    eq = getattr(equipment, random.sample(list(defs.ITEMS.keys())).replace(" ", ""))(self.return_view.hero)
+                    eq = getattr(equipment, random.choice(list(defs.ITEMS.keys())).replace(" ", ""))(self.return_view.hero)
                 p = random.randint(0,len(defs.PRICES)-1)
                 self.items.append((eq,defs.PRICES[p]))
             self.return_view.shop_items = self.items    

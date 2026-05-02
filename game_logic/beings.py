@@ -37,8 +37,6 @@ class Hero(Being):
         self.active_equipment = []
 
     def to_dict(self):
-        for eq in self.active_equipment:
-            eq.remove()
         return {
                 "type": type(self).__name__,         
                 "hp": self.hp,
@@ -81,8 +79,6 @@ class Hero(Being):
             getattr(equipment, eq)(hero)
             for eq in data["active_equipment"]
         ] 
-        for eq in hero.active_equipment:
-            eq.apply()
         hero.status_effects = []     
         return hero   
 

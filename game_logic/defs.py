@@ -3,7 +3,7 @@ from pathlib import Path
 
 #Knight base stats
 KNIGHT_HP = 300
-KNIGHT_ATK = 10.0
+KNIGHT_ATK = 100.0
 KNIGHT_DEF = 1.0
 KNIGHT_MAGIC = 1.0
 

@@ -64,7 +64,7 @@ class BattleView(arcade.View):
             if self.game.result:
                 for effect in self.hero.status_effects:
                     effect.remove()
-                self.return_view.current_floor +=1
+
                 order = random.randint(0,3)
                 move = None
                 if type(self.enemy.moves[order]) in [type(m) for m in self.hero.available_moves]:
@@ -80,12 +80,16 @@ class BattleView(arcade.View):
                     eq = rand_eq
                     self.hero.available_equipment.append(eq)
                 self.window.show_view(victory_view.VictoryView(xp_gained=defs.XP[self.enemy.order-1],
-                                                                   gold_gained=defs.GOLD[self.enemy.order],
+                                                                   gold_gained=defs.GOLD[self.enemy.order-1],
                                                                    move_learned=move_name(move),
                                                                    equipment_found=eq,
                                                                    map=self.current_map,
                                                                    return_view=self.return_view,
                                                                    enemy_name=type(self.enemy).__name__))
+                if self.return_view.current_floor == self.return_view.temp_floor:
+                    self.return_view.current_floor +=1
+                    self.return_view.temp_floor +=1
+                    
             else:
                 self.window.show_view(defeat_view.DefeatView(map=self.current_map,enemy_name=type(self.enemy).__name__))
         main_anchor = self.manager.add(arcade.gui.UIAnchorLayout())
