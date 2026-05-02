@@ -25,11 +25,7 @@ class MyButton(arcade.gui.UITextureButton):
     def apply_style(self, state):
         super().apply_style(state)
 
-    def on_update(self, dt):
-        if self.hovered:
-            self.scale = 1.05
-        else:
-            self.scale = 1.0
+
     
     def on_event(self, event):
         if isinstance(event, arcade.gui.events.UIMouseMovementEvent):     

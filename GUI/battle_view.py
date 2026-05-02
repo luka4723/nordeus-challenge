@@ -76,9 +76,10 @@ class BattleView(arcade.View):
                 eq = None
                 rand_eq = random.choice(list(defs.ITEMS.keys())).replace(" ", "")
                 rand_eq = getattr(equipment, rand_eq)(self.hero)
-                if rand_eq not in self.hero.equipment:
+                if rand_eq not in self.hero.available_equipment:
                     eq = rand_eq
-                self.window.show_view(victory_view.VictoryView(xp_gained=defs.XP[self.enemy.order],
+                    self.hero.available_equipment.append(eq)
+                self.window.show_view(victory_view.VictoryView(xp_gained=defs.XP[self.enemy.order-1],
                                                                    gold_gained=defs.GOLD[self.enemy.order],
                                                                    move_learned=move_name(move),
                                                                    equipment_found=eq,

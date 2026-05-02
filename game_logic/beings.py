@@ -1,6 +1,7 @@
 from game_logic import moves
 from game_logic import defs
 from game_logic import status_effects
+from game_logic import equipment
 
 class Being:
     def __init__(self,hp,atk,defense,magic):
@@ -32,9 +33,12 @@ class Hero(Being):
         self.lvl = 1
         self.moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
         self.available_moves = [moves.Slash(self), moves.ShieldUp(self), moves.BattleCry(self), moves.SecondWind(self)]
-        self.equipment = []
+        self.available_equipment = []
+        self.active_equipment = []
 
     def to_dict(self):
+        for eq in self.active_equipment:
+            eq.remove()
         return {
                 "type": type(self).__name__,         
                 "hp": self.hp,
@@ -46,7 +50,9 @@ class Hero(Being):
                 "xp": self.xp,
                 "gold": self.gold,
                 "moves": [type(move).__name__ for move in self.moves],
-                "available_moves": [type(move).__name__ for move in self.available_moves]
+                "available_moves": [type(move).__name__ for move in self.available_moves],
+                "available_equipment": [type(eq).__name__ for eq in self.available_equipment],
+                "active_equipment": [type(eq).__name__ for eq in self.active_equipment]
                 }
     @staticmethod
     def from_dict(data):
@@ -66,7 +72,17 @@ class Hero(Being):
         hero.available_moves = [
             getattr(moves, move)(hero)
             for move in data["available_moves"]
-        ]          
+        ]         
+        hero.available_equipment = [
+            getattr(equipment, eq)(hero)
+            for eq in data["available_equipment"]
+        ] 
+        hero.active_equipment = [
+            getattr(equipment, eq)(hero)
+            for eq in data["active_equipment"]
+        ] 
+        for eq in hero.active_equipment:
+            eq.apply()
         hero.status_effects = []     
         return hero   
 

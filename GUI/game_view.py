@@ -2,8 +2,8 @@ import arcade
 import arcade.gui
 from pathlib import Path
 import game_logic.client
-from game_logic import defs, beings
-from GUI import main_menu_view,moves_view,elements, battle_view
+from game_logic import defs, beings, equipment
+from GUI import main_menu_view,moves_view,elements, battle_view, equipment_view
 import json
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")
@@ -41,10 +41,6 @@ class GameView(arcade.View):
             self.enemies = game_logic.client.getState()
             self.current_floor = 0
         
-
-        self.up_icon = arcade.load_texture(":res:up.png")
-        self.right_icon = self.up_icon.rotate_90()
-        self.left_icon = self.up_icon.rotate_270()
         self.player_texture = play_tex
         
         self.enemy_textures = []
@@ -90,6 +86,11 @@ class GameView(arcade.View):
         @btns[1].event("on_click")
         def on_click_switch_button(event):
             self.window.show_view(moves_view.MovesView(self.hero,self, map=self.current_map))
+
+        @btns[2].event("on_click")
+        def on_click_switch_button(event):
+            self.window.show_view(equipment_view.EquipmentView(map=self.current_map,hero=self.hero,return_view=self))
+
         @btns[3].event("on_click")
         def on_click_switch_button(event):
             save_dict = {
@@ -140,9 +141,9 @@ class GameView(arcade.View):
             if self.levelup_available and stat in ("HP", "ATK", "DEF", "MAG"):
                 btn = elements.MyButton(
                     text="",
-                    texture=self.up_icon, 
-                    texture_hovered=self.up_icon,
-                    texture_pressed=self.up_icon,
+                    texture=defs.UP_TEX, 
+                    texture_hovered=defs.UP_TEX,
+                    texture_pressed=defs.UP_TEX,
                     width=30, height=30, text_size=16
                 )
                 @btn.event("on_click")
@@ -156,23 +157,35 @@ class GameView(arcade.View):
         eq_title = make_label("EQUIPMENT", font_size=20, color=arcade.color.GOLD)
         center_panel.add(eq_title)
 
-        eq_slots = [
-            ("Head", "──"),
-            ("Torso", "──"),
-            ("Arms", "──"),
-            ("Legs", "──"),
-            ("Weapon", "──"),
-            ("Shield", "──"),
-            ("Acc.", "──"),
+        SLOTS = [
+            ("Head",   equipment.Head),
+            ("Torso",  equipment.Torso),
+            ("Arms",   equipment.Arms),
+            ("Legs",   equipment.Legs),
+            ("Weapon", equipment.Weapon),
+            ("Shield", equipment.Shield),
+            ("Acc",    equipment.Acc),
         ]
 
         eq_grid = arcade.gui.UIGridLayout(
-            column_count=2, row_count=len(eq_slots),
+            column_count=2, row_count=7,
             horizontal_spacing=24, vertical_spacing=6
         )
-        for i, (slot, val) in enumerate(eq_slots):
+            
+        for i, (slot, val) in enumerate(SLOTS):
             eq_grid.add(make_label(slot + ":", color=arcade.color.LIGHT_BLUE), column=0, row=i)
-            eq_grid.add(make_label(val, color=arcade.color.GRAY), column=1, row=i)
+            has = False
+            for eq in self.hero.active_equipment:
+                if isinstance(eq, getattr(equipment,slot)):
+                    has = True
+            if has:
+                eq_grid.add(arcade.gui.UIImage(
+                texture=eq.tex, width=32, height=32
+            ), column=1, row=i)
+            else:
+                eq_grid.add(arcade.gui.UIImage(
+                texture=defs.X_ICON, width=32, height=32
+            ), column=1, row=i)
         center_panel.add(eq_grid)
 
         # RIGHT PANEL
@@ -215,9 +228,9 @@ class GameView(arcade.View):
 
         btn_left = elements.MyButton(
             text="",
-            texture=self.left_icon,
-            texture_hovered=self.left_icon,
-            texture_pressed=self.left_icon,
+            texture=defs.LEFT_TEX,
+            texture_hovered=defs.LEFT_TEX,
+            texture_pressed=defs.LEFT_TEX,
             width=30, height=30, text_size=1
         )
         @btn_left.event("on_click")
@@ -231,9 +244,9 @@ class GameView(arcade.View):
 
         btn_right = elements.MyButton(
             text="",
-            texture=self.right_icon,
-            texture_hovered=self.right_icon,
-            texture_pressed=self.right_icon,
+            texture=defs.RIGHT_TEX,
+            texture_hovered=defs.RIGHT_TEX,
+            texture_pressed=defs.RIGHT_TEX,
             width=30, height=30, text_size=1
         )
         @btn_right.event("on_click")

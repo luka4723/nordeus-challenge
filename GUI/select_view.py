@@ -34,9 +34,9 @@ class SelectView(arcade.View):
 
         btn_left = elements.MyButton(
             text="",
-            texture=arcade.load_texture(":res:up.png").rotate_270(),
-            texture_hovered=arcade.load_texture(":res:up.png").rotate_270(),
-            texture_pressed=arcade.load_texture(":res:up.png").rotate_270(),
+            texture=defs.LEFT_TEX,
+            texture_hovered=defs.LEFT_TEX,
+            texture_pressed=defs.LEFT_TEX,
             width=30, height=30, text_size=1
         )
         @btn_left.event("on_click")
@@ -51,9 +51,9 @@ class SelectView(arcade.View):
 
         btn_right = elements.MyButton(
             text="",
-            texture=arcade.load_texture(":res:up.png").rotate_90(),
-            texture_hovered=arcade.load_texture(":res:up.png").rotate_90(),
-            texture_pressed=arcade.load_texture(":res:up.png").rotate_90(),
+            texture=defs.RIGHT_TEX,
+            texture_hovered=defs.RIGHT_TEX,
+            texture_pressed=defs.RIGHT_TEX,
             width=30, height=30, text_size=1
         )
         @btn_right.event("on_click")

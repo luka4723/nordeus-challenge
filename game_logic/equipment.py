@@ -17,10 +17,10 @@ class Equipment():
         self.val = defs.ITEMS[i][2]
     
     def apply(self):
-        pass
+        setattr(self.hero, self.stat, getattr(self.hero, self.stat) + self.val)
 
     def remove(self):
-        pass
+        setattr(self.hero, self.stat, getattr(self.hero, self.stat) - self.val)
 
 class Head(Equipment):
     def __init__(self, hero):

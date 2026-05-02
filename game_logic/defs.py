@@ -149,6 +149,10 @@ BTN_NORMAL_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_no
 BTN_HOVERED_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png")
 BTN_PRESSED_TEX = arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png")
 
+UP_TEX = arcade.load_texture(":res:up.png")
+RIGHT_TEX = UP_TEX.rotate_90()
+LEFT_TEX = UP_TEX.rotate_270()
+
 monster_sheet = arcade.load_spritesheet(":res:monsters.png")
 item_sheet = arcade.load_spritesheet(":res:items.png")
 hero_sheet = arcade.load_spritesheet(":res:rogues.png")
@@ -162,7 +166,7 @@ MAP_ICONS = [
 ]
 
 GOLD_ICON = arcade.load_texture(":res:gold.png")
-
+X_ICON = arcade.load_texture(":res:none.png")
 MAP_IMGS = [
     arcade.load_texture(":res:desert_menu.png"),
     arcade.load_texture(":res:forest_menu.png"),
@@ -187,7 +191,7 @@ BEING_SPRITES = {
 }
 
 ITEMS = {
-    "The Crucible": [texture_list_item[9],"atk",5],
+    "The Crucible": [texture_list_item[9],"atk",0.1],
     "Viper Edge": [texture_list_item[16],"atk",5],
     "Hallebarde": [texture_list_item[35],"atk",5],
     "Crusher": [texture_list_item[48],"atk",5],
