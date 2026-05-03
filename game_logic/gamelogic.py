@@ -13,8 +13,8 @@ class Encounter:
     def heroMove(self, move : moves.Move):
         move.cast(self.enemy)
         if self.enemy.hp <= 0:
-            self.hero.xp += defs.XP[self.enemy.order-1]
-            self.hero.gold += defs.GOLD[self.enemy.order-1]
+            self.hero.xp += defs.BASE_XP + defs.XP_INC*self.enemy.order
+            self.hero.gold += defs.BASE_GOLD + defs.GOLD_INC*self.enemy.order
             self.result = True
             return True
 

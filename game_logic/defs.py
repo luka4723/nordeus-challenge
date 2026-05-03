@@ -135,8 +135,10 @@ SHATTEREDFLASK_LEN        = data["SHATTEREDFLASK_LEN"]
 
 HYPNOTIZE_LEN = data["HYPNOTIZE_LEN"]
 
-XP     = data["XP"]
-GOLD   = data["GOLD"]
+BASE_XP     = data["BASE_XP"]
+BASE_GOLD   = data["BASE_GOLD"]
+XP_INC     = data["XP_INC"]
+GOLD_INC   = data["GOLD_INC"]
 PRICES = data["PRICES"]
 
 assets_path = Path(__file__).parent.parent.resolve() / Path("resources")

@@ -18,6 +18,7 @@ class SelectView(arcade.View):
         self.icon = None
         self.widget = None
         self.current_map = map
+        self.endless = False
 
     def build_ui(self):
         self.manager.clear()
@@ -69,6 +70,36 @@ class SelectView(arcade.View):
         selector_row.add(btn_right)
         layout.add(selector_row)
 
+        endless_row = arcade.gui.UIBoxLayout(vertical=False, space_between=10)
+        endless_label = make_label("Endless mode:", font_size=16, color=arcade.color.LIGHT_BLUE)
+        
+        empty_tex = arcade.Texture.create_empty("empty_checkbox", (30, 30))
+        
+        initial_tex = defs.X_ICON if self.endless else empty_tex
+        
+        btn_checkbox = elements.MyButton(
+            text="",
+            texture=initial_tex,
+            texture_hovered=initial_tex,
+            texture_pressed=initial_tex,
+            width=30, height=30, text_size=1
+        )
+        
+        @btn_checkbox.event("on_click")
+        def on_checkbox_click(event, view=self, btn=btn_checkbox, empty=empty_tex):
+            defs.SOUND.play(volume=0.08)
+            view.endless = not view.endless  
+            
+            new_tex = defs.X_ICON if view.endless else empty
+            btn.texture = new_tex
+            btn.texture_hovered = new_tex
+            btn.texture_pressed = new_tex
+            
+        endless_row.add(endless_label)
+        
+        endless_row.add(btn_checkbox.with_border(width=2, color=arcade.color.GOLD))
+        layout.add(endless_row)
+        
         # Btn
         btn_confirm = elements.MyButton(
             text="Continue",
@@ -82,7 +113,7 @@ class SelectView(arcade.View):
             defs.SOUND.play(volume=0.08)
             hero = getattr(beings, self.names[self.current])()
             self.window.show_view(game_view.GameView(map=self.current_map,hero = hero, 
-                                                     play_tex=self.icon.texture))
+                                                     play_tex=self.icon.texture,endless=self.endless))
         layout.add(btn_confirm)
 
         anchor = self.manager.add(arcade.gui.UIAnchorLayout())

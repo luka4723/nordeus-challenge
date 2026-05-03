@@ -77,7 +77,8 @@ class MainMenuView(arcade.View):
                     save_dict = json.load(f)
                     hero = beings.Hero.from_dict(save_dict["hero"])
                 f.close()
-                self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=defs.BEING_SPRITES[type(hero).__name__],hero=hero))
+                self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=defs.BEING_SPRITES[type(hero).__name__],
+                                                         hero=hero))
 
         @quit_button.event("on_click")
         def on_click_exit(event):

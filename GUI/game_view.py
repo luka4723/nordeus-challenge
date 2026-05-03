@@ -19,7 +19,7 @@ def make_label(text, font_size=16, bold=False, color=arcade.color.WHITE):
     )
 
 class GameView(arcade.View):
-    def __init__(self, map, hero, play_tex, from_save=False):
+    def __init__(self, map, hero, play_tex,endless=None ,from_save=False):
         super().__init__()
         self.manager = arcade.gui.UIManager()
         self.current_map = map
@@ -52,11 +52,15 @@ class GameView(arcade.View):
                 self.current_map = save_dict["map"]
                 self.start_time = save_dict["start_time"]
                 self.paused_duration = save_dict["paused_duration"] + (time.time() - save_dict["pause_start"])
+                self.endless = save_dict["endless"]
+                self.floor_count = save_dict["floor_count"]
         else:
             self.hero = hero
-            self.enemies = game_logic.client.getState()
+            self.endless = endless
+            self.enemies = game_logic.client.getState(endless)
             self.current_floor = 0
             self.temp_floor = self.current_floor
+            self.floor_count = 0
 
         self.player_texture = play_tex
         
@@ -128,7 +132,7 @@ class GameView(arcade.View):
                                                         enemy=self.enemies[self.temp_floor],
                                                         hero_texture=self.player_texture,
                                                         enemy_texture=self.enemy_textures[self.temp_floor],
-                                                        return_view=self, map = self.current_map
+                                                        return_view=self, map = self.current_map, endless=self.endless,floor=self.floor_count
                                                     ))
         @btns[1].event("on_click")
         def on_click_moves(event):
@@ -162,7 +166,9 @@ class GameView(arcade.View):
                 "map" : self.current_map,
                 "start_time": self.start_time,
                 "paused_duration": self.paused_duration,
-                "pause_start": time.time()
+                "pause_start": time.time(),
+                "endless": self.endless,
+                "floor_count": self.floor_count,
             }
             with open(assets_path / "savefile.txt", "w") as f:
                 json.dump(save_dict, f, indent=4)
@@ -181,9 +187,9 @@ class GameView(arcade.View):
         self.lvl_label = make_label(f"{self.hero.lvl}", bold=True)
         self.xp_label = make_label(f"{self.hero.xp} / {100+(self.hero.lvl-1)*20}", bold=True)
         self.hp_label = make_label(f"{round(self.hero.hp)} / {self.hero.max_hp}", bold=True)
-        self.atk_label = make_label(f"{self.hero.atk}", bold=True)
-        self.def_label = make_label(f"{self.hero.defense}", bold=True)
-        self.mag_label = make_label(f"{self.hero.magic}", bold=True)
+        self.atk_label = make_label(f"{round(self.hero.atk,1)}", bold=True)
+        self.def_label = make_label(f"{round(self.hero.defense,1)}", bold=True)
+        self.mag_label = make_label(f"{round(self.hero.magic,1)}", bold=True)
 
         stats_data_labels = [
             ("Level", self.lvl_label),
@@ -272,6 +278,16 @@ class GameView(arcade.View):
             column_count=1, row_count=5, horizontal_spacing=0, vertical_spacing=6
         )
         
+        if self.endless:
+            if self.current_floor ==3:
+                self.current_floor-=1
+                self.temp_floor-=1
+                enemy = beings.FOE_LIST[random.randint(0,len(beings.FOE_LIST)-1)](self.floor_count+3)
+                self.enemies.append(enemy)
+                self.enemy_textures.append(defs.BEING_SPRITES[f"{type(enemy).__name__}"])
+                self.enemy_textures = self.enemy_textures[-5:]
+                self.enemies = self.enemies[-5:]
+
         self.player_slot_images = []
         for i in range(5):
             floor = 4 - i
@@ -300,7 +316,6 @@ class GameView(arcade.View):
             btn.floor = floor
             @btn.event("on_click")
             def on_enemy_click(event,b=btn):
-                print(b.floor, self.current_floor)
                 if b.floor <= self.current_floor:
                     self.temp_floor = b.floor
                     self.update_ui()

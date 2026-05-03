@@ -9,11 +9,13 @@ def make_label(text, font_size=16, bold=False, color=arcade.color.WHITE):
     )
 
 class DefeatView(arcade.View):
-    def __init__(self, map, enemy_name):
+    def __init__(self, map, enemy_name,endless,floor=None):
         super().__init__()
         self.manager = arcade.gui.UIManager()
         self.map = map
+        self.floor = floor
         self.enemy_name = enemy_name
+        self.endless = endless
         self.widget = None
         self.build_ui()
 
@@ -28,6 +30,10 @@ class DefeatView(arcade.View):
         layout.add(make_label(
             f"{self.enemy_name} was too strong.", font_size=18, color=arcade.color.WHITE
         ))
+        if self.endless:
+            layout.add(make_label(
+                f"Floors beaten:  {self.floor}", font_size=18, color=arcade.color.WHITE
+            ))
 
         btn = elements.MyButton(
             text="Continue",

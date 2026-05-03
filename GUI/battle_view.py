@@ -39,14 +39,15 @@ def play_sound():
 
 class BattleView(arcade.View):
     def __init__(self, hero: beings.Hero, enemy: beings.Foe,
-                 hero_texture, enemy_texture, return_view, map):
+                 hero_texture, enemy_texture, return_view, map,endless,floor):
         super().__init__()
         self.hero         = hero
         self.enemy        = enemy
-        print(enemy.order)
         self.hero_texture  = hero_texture
         self.enemy_texture = enemy_texture
         self.return_view  = return_view
+        self.endless = endless
+        self.floor = floor
         self.manager      = arcade.gui.UIManager()
         self.log_lines    = []
         self.log_panel    = None
@@ -217,6 +218,7 @@ class BattleView(arcade.View):
             if self.game.result:
                 for effect in self.hero.status_effects:
                     effect.remove()
+                self.enemy.hp = self.enemy.max_hp
                 self.hero.status_effects = []
 
                 order    = random.randint(0, 3)
@@ -233,8 +235,8 @@ class BattleView(arcade.View):
                     self.hero.available_equipment.append(eq)
 
                 self.window.show_view(victory_view.VictoryView(
-                    xp_gained       = defs.XP[self.enemy.order - 1],
-                    gold_gained     = defs.GOLD[self.enemy.order - 1],
+                    xp_gained       = defs.BASE_XP + defs.XP_INC*self.enemy.order,
+                    gold_gained     = defs.BASE_GOLD + defs.GOLD_INC*self.enemy.order,
                     move_learned    = move_name(move) if move else "None",
                     equipment_found = eq,
                     map             = self.current_map,
@@ -242,12 +244,20 @@ class BattleView(arcade.View):
                     enemy_name      = type(self.enemy).__name__
                 ))
                 if self.return_view.current_floor == self.return_view.temp_floor:
-                    self.return_view.current_floor += 1
-                    self.return_view.temp_floor    += 1
+                    if self.endless:
+                        if self.return_view.current_floor <=2:
+                            self.return_view.current_floor += 1
+                            self.return_view.temp_floor    += 1
+                    else:
+                        self.return_view.current_floor += 1
+                        self.return_view.temp_floor    += 1
+                    self.return_view.floor_count +=1
             else:
                 self.window.show_view(defeat_view.DefeatView(
                     map        = self.current_map,
-                    enemy_name = type(self.enemy).__name__
+                    enemy_name = type(self.enemy).__name__,
+                    floor = self.floor,
+                    endless= self.endless
                 ))
 
         main_anchor = self.manager.add(arcade.gui.UIAnchorLayout())

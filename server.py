@@ -16,6 +16,16 @@ def home():
         "seed": monster_order,
     }
 
+@app.get("/endless")
+def home():
+    global next_id
+    next_id += 1
+    monster_order = [1,2,3,4,5]
+    random.shuffle(monster_order)
+    return {
+        "seed": monster_order,
+    }
+
 
 @app.get("/c/1")
 def get_user(enemy_hp: float, enemy_atk: float, enemy_def: float, enemy_mag: float,
@@ -29,7 +39,7 @@ def get_user(enemy_hp: float, enemy_atk: float, enemy_def: float, enemy_mag: flo
 def get_defs():
     return {
         "KNIGHT_HP": 200,
-        "KNIGHT_ATK": 20.2,
+        "KNIGHT_ATK": 2.2,
         "KNIGHT_DEF": 1.4,
         "KNIGHT_MAGIC": 0.8,
 
@@ -157,10 +167,13 @@ def get_defs():
 
         "HYPNOTIZE_LEN": 1,
 
-        "XP": [150, 70, 90, 110, 130],
-        "GOLD": [100, 100, 100, 100, 100],
+        "BASE_XP": 25,
+        "BASE_GOLD": 80,
+        "XP_INC": 5,
+        "GOLD_INC": 5,
         "PRICES": [60, 80, 100, 120, 140],
     }
-
+    #XP inc gives bonus xp per order of the enemy (gold too)
+    #prices are randomly assigned to items in shop. Array can be of any length
 if __name__ == '__main__':
     uvicorn.run(app)
