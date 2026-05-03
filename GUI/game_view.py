@@ -73,11 +73,11 @@ class GameView(arcade.View):
 
     def update_ui(self):
         self.lvl_label.text = f"{self.hero.lvl}"
-        self.xp_label.text = f"{self.hero.xp} / {100+(self.hero.lvl-1)*20}"
-        self.hp_label.text = f"{round(self.hero.hp)} / {self.hero.max_hp}"
-        self.atk_label.text = f"{self.hero.atk}"
-        self.def_label.text = f"{self.hero.defense}"
-        self.mag_label.text = f"{self.hero.magic}"
+        self.xp_label.text = f"{round(self.hero.xp)} / {100+(round(self.hero.lvl-1))*20}"
+        self.hp_label.text = f"{round(self.hero.hp)} / {round(self.hero.max_hp)}"
+        self.atk_label.text = f"{round(self.hero.atk,2)}"
+        self.def_label.text = f"{round(self.hero.defense,2)}"
+        self.mag_label.text = f"{round(self.hero.magic,2)}"
 
         self.levelup_available = self.hero.xp >= 100 + (self.hero.lvl - 1) * 20
     
@@ -297,10 +297,12 @@ class GameView(arcade.View):
                 texture_pressed=self.enemy_textures[floor],
                 width=80, height=80, text_size=1
             )
+            btn.floor = floor
             @btn.event("on_click")
-            def on_enemy_click(event, f=floor):
-                if floor < self.current_floor:
-                    self.temp_floor = f
+            def on_enemy_click(event,b=btn):
+                print(b.floor, self.current_floor)
+                if b.floor <= self.current_floor:
+                    self.temp_floor = b.floor
                     self.update_ui()
             self.enemy_slots[floor] = btn
             enemy_col.add(btn, column=0, row=i)

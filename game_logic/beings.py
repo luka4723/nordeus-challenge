@@ -170,3 +170,10 @@ class Mage(Foe):
         super().__init__(order, defs.MAGE_HP, defs.MAGE_ATK, defs.MAGE_DEF, defs.MAGE_MAGIC)
         self.moves = [moves.Firebolt(self), moves.ArcaneSurge(self), moves.ManaDrain(self), moves.HexShield(self)]
         
+FOE_LIST = [
+    Witch,
+    Spider,
+    Dragon,
+    Warrior,
+    Mage
+]

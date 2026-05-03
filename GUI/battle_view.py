@@ -43,6 +43,7 @@ class BattleView(arcade.View):
         super().__init__()
         self.hero         = hero
         self.enemy        = enemy
+        print(enemy.order)
         self.hero_texture  = hero_texture
         self.enemy_texture = enemy_texture
         self.return_view  = return_view
@@ -407,7 +408,7 @@ class BattleView(arcade.View):
             right_x = px + panel_width // 2
             arcade.draw_text("Move history:", right_x + padding, py - padding - 16,
                              arcade.color.LIGHT_GRAY, 16, font_name="Kenney Mini")
-            for i, line in enumerate(self.log_lines[-5:]):
+            for i, line in enumerate(self.log_lines[-8:]):
                 arcade.draw_text(line, right_x + padding, py - padding - 36 - i * 18,
                                  arcade.color.LIGHT_GRAY, 12, font_name="Kenney Mini")
 

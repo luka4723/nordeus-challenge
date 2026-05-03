@@ -120,7 +120,7 @@ class TickEffect(Effect):
 class Bleed(TickEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
-        self.desc = f"{type(self.carrier).__name__} bled for {self.value/self.carrier.defense} HP"
+        self.desc = f"{type(self.carrier).__name__} bled for {round(self.value/self.carrier.defense)} HP"
         self.tex = arcade.load_texture(":res:bleed.png")
 
     def apply(self):

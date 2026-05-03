@@ -19,7 +19,7 @@ class Encounter:
             return True
 
     def foeMove(self):
-        r2 = requests.get(f"http://127.0.0.1:8000/user/1", params={
+        r2 = requests.get(f"http://127.0.0.1:8000/c/1", params={
                 "enemy_hp": self.enemy.hp,
                 "enemy_atk": self.enemy.atk,
                 "enemy_def": self.enemy.defense,
