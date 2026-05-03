@@ -40,9 +40,9 @@ class Encounter:
     def applyEffectsH(self):
         new_status = []
         for effect in self.hero.status_effects:
+            effect.duration -= 1
             if effect.duration>0:
                 new_status.append(effect)
-                effect.duration -= 1
                 effect.apply()
             else:
                 effect.remove()
@@ -54,9 +54,9 @@ class Encounter:
     def applyEffectsE(self):
         new_status = []
         for effect in self.enemy.status_effects:
+            effect.duration -= 1
             if effect.duration>0:
                 new_status.append(effect)
-                effect.duration -= 1
                 effect.apply()
             else:
                 effect.remove()

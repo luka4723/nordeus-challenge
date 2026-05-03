@@ -38,6 +38,7 @@ class DefeatView(arcade.View):
         )
         @btn.event("on_click")
         def on_continue(event, view=self):
+            defs.SOUND.play(volume=0.08)
             from GUI import main_menu_view
             view.window.show_view(main_menu_view.MainMenuView())
         layout.add(btn)

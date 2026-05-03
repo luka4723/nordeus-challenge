@@ -115,6 +115,7 @@ class DecreaseMagic(StatEffect):
 class TickEffect(Effect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
+        self.duration += 1
 
 class Bleed(TickEffect):
     def __init__(self, carrier, value, duration):
@@ -137,7 +138,7 @@ class Poison(TickEffect):
 class Dizzy(TickEffect):
     def __init__(self, carrier, value, duration):
         super().__init__(carrier, value, duration)
-        self.desc = f"{type(self.carrier).__name__} is dizzy."
+        self.desc = f"{type(self.carrier).__name__} is dizzy for {self.duration+1} moves."
         self.tex = arcade.load_texture(":res:dizzy.png")
 
         

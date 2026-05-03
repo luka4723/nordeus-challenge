@@ -14,6 +14,8 @@ window.center_window()
 
 if __name__ == '__main__':
     #current_win = gv.GameView(map=0)
+    sound = arcade.Sound(":resources:/music/funkyrobot.mp3")
+    sound.play(volume=0.04,loop=True)
     current_win = mmv.MainMenuView()
     window.show_view(current_win)
     arcade.run()

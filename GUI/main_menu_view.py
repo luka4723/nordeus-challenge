@@ -65,12 +65,14 @@ class MainMenuView(arcade.View):
         self.grid.add(quit_button, column= 0, row=2)
 
         @enter_button.event("on_click")
-        def on_click_switch_button(event):
+        def on_click_new(event):
             self.window.show_view(select_view.SelectView(map=self.current_map,return_view=self))
+            defs.SOUND.play(volume=0.08)
 
         @continue_button.event("on_click")
-        def on_click_switch_button(event):
+        def on_click_continue(event):
             if self.cont_avl:
+                defs.SOUND.play(volume=0.08)
                 with open(assets_path / "savefile.txt", "r") as f:
                     save_dict = json.load(f)
                     hero = beings.Hero.from_dict(save_dict["hero"])
@@ -78,8 +80,10 @@ class MainMenuView(arcade.View):
                 self.window.show_view(game_view.GameView(self.current_map,from_save=True,play_tex=defs.BEING_SPRITES[type(hero).__name__],hero=hero))
 
         @quit_button.event("on_click")
-        def on_click_switch_button(event):
+        def on_click_exit(event):
+            defs.SOUND.play(volume=0.08)
             arcade.exit()
+            self.window.close()
 
         self.current_map = random.randint(0,2)
 

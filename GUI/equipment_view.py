@@ -37,6 +37,7 @@ class EquipmentView(arcade.View):
         self.map = map
         self.widget = None
         self.center_btns = {}
+        self.slot_buttons = {}
         self.scroll_index = {slot: 0 for slot, _ in SLOTS}
         self.hovered_move = None
         self.hover_start_time = 0
@@ -75,38 +76,16 @@ class EquipmentView(arcade.View):
             return items[idx - 1]
         return None
 
-    def build_ui(self):
-        self.manager.clear()
-        self.center_btns = {}
-
-        layout = arcade.gui.UIBoxLayout(vertical=True, space_between=12)
-        layout.add(make_label("Equipment:", font_size=22, bold=True, color=arcade.color.GOLD))
-
+    def update_ui(self):
+        """Osvežava samo teksture i objekte na dugmićima, bez brisanja celog UI-a."""
         for slot_name, slot_type in SLOTS:
-            items = self.items_for_slot(slot_type)
-            total = len(items) + 1
+            slot_items = self.items_for_slot(slot_type)
+            slot_items_display = self.items_for_slot_display(slot_type)
+            total = len(slot_items) + 1
             idx = self.scroll_index[slot_name]
 
-            row = arcade.gui.UIBoxLayout(vertical=False, space_between=8)
-            row.add(make_label(f"{slot_name}:".ljust(7), font_size=16, color=arcade.color.LIGHT_BLUE))
-
-            btn_left = elements.MyButton(
-                text="",
-                texture=defs.LEFT_TEX,
-                texture_hovered=defs.LEFT_TEX,
-                texture_pressed=defs.LEFT_TEX,
-                width=24, height=24, text_size=1
-            )
-            @btn_left.event("on_click")
-            def on_left(event, sn=slot_name, tot=total):
-                self.scroll_index[sn] = (self.scroll_index[sn] - 1) % tot
-                self.needs_rebuild = True
-            row.add(btn_left)
-
-            for offset in [-1, 0, 1]:
+            for j, offset in enumerate([-1, 0, 1]):
                 i = (idx + offset) % total
-                slot_items = self.items_for_slot(slot_type)
-                slot_items_display = self.items_for_slot_display(slot_type)
 
                 if i == 0 or i - 1 >= len(slot_items):
                     tex = defs.X_ICON
@@ -115,44 +94,74 @@ class EquipmentView(arcade.View):
                     tex = slot_items[i - 1].tex
                     display_item = slot_items_display[i - 1]
 
-                btn = elements.MyButton(
-                    text="",
-                    texture=tex,
-                    texture_hovered=tex,
-                    texture_pressed=tex,
-                    width=40, height=40, text_size=1, parent_win=self
-                )
-                btn.move = display_item
+                btn = self.slot_buttons[slot_name][j]
+                
+                btn.texture = tex
+                btn.texture_hovered = tex
+                btn.texture_pressed = tex
+                btn.move = type(display_item)(self.hero) if display_item is not None else None
 
+    def build_ui(self):
+        self.manager.clear()
+        self.center_btns = {}
+        self.slot_buttons = {}
+
+        layout = arcade.gui.UIBoxLayout(vertical=True, space_between=12)
+        layout.add(make_label("Equipment:", font_size=22, bold=True, color=arcade.color.GOLD))
+
+        for slot_name, slot_type in SLOTS:
+            row = arcade.gui.UIBoxLayout(vertical=False, space_between=8)
+            row.add(make_label(f"{slot_name}:".ljust(7), font_size=16, color=arcade.color.LIGHT_BLUE))
+
+            # left
+            btn_left = elements.MyButton(
+                text="", texture=defs.LEFT_TEX, texture_hovered=defs.LEFT_TEX,
+                texture_pressed=defs.LEFT_TEX, width=24, height=24, text_size=1
+            )
+            @btn_left.event("on_click")
+            def on_left(event, sn=slot_name, st=slot_type):
+                defs.SOUND.play(volume=0.08)
+                tot = len(self.items_for_slot(st)) + 1
+                self.scroll_index[sn] = (self.scroll_index[sn] - 1) % tot
+                self.update_ui()
+            row.add(btn_left)
+
+            self.slot_buttons[slot_name] = []
+            for offset in [-1, 0, 1]:
+                btn = elements.MyButton(
+                    text="", texture=defs.X_ICON, texture_hovered=defs.X_ICON,
+                    texture_pressed=defs.X_ICON, width=40, height=40, text_size=1, parent_win=self
+                )
+                
+                self.slot_buttons[slot_name].append(btn)
                 if offset == 0:
                     self.center_btns[slot_name] = btn
 
                 row.add(btn)
 
+            # right
             btn_right = elements.MyButton(
-                text="",
-                texture=defs.RIGHT_TEX,
-                texture_hovered=defs.RIGHT_TEX,
-                texture_pressed=defs.RIGHT_TEX,
-                width=24, height=24, text_size=1
+                text="", texture=defs.RIGHT_TEX, texture_hovered=defs.RIGHT_TEX,
+                texture_pressed=defs.RIGHT_TEX, width=24, height=24, text_size=1
             )
             @btn_right.event("on_click")
-            def on_right(event, sn=slot_name, tot=total):
+            def on_right(event, sn=slot_name, st=slot_type):
+                defs.SOUND.play(volume=0.08)
+                tot = len(self.items_for_slot(st)) + 1
                 self.scroll_index[sn] = (self.scroll_index[sn] + 1) % tot
-                self.needs_rebuild = True
+                self.update_ui()
             row.add(btn_right)
 
             layout.add(row)
 
+        # btn
         btn_done = elements.MyButton(
-            text="Done",
-            texture=defs.BTN_NORMAL_TEX,
-            texture_hovered=defs.BTN_HOVERED_TEX,
-            texture_pressed=defs.BTN_PRESSED_TEX,
-            width=200, height=60, text_size=25
+            text="Done", texture=defs.BTN_NORMAL_TEX, texture_hovered=defs.BTN_HOVERED_TEX,
+            texture_pressed=defs.BTN_PRESSED_TEX, width=200, height=60, text_size=25
         )
         @btn_done.event("on_click")
         def on_done(event, view=self):
+            defs.SOUND.play(volume=0.08)
             view.apply_equipment()
             view.window.show_view(view.return_view)
         layout.add(btn_done)
@@ -160,6 +169,8 @@ class EquipmentView(arcade.View):
         self.widget = layout
         anchor = self.manager.add(arcade.gui.UIAnchorLayout())
         anchor.add(anchor_x="center_x", anchor_y="center_y", child=layout)
+        
+        self.update_ui()
 
     def apply_equipment(self):
         for item in self.hero.active_equipment:
@@ -171,11 +182,6 @@ class EquipmentView(arcade.View):
             if selected is not None:
                 selected.apply()
                 self.hero.active_equipment.append(selected)
-
-    def on_update(self, delta_time):
-        if getattr(self, 'needs_rebuild', False):
-            self.needs_rebuild = False
-            self.build_ui()
 
     def on_show_view(self):
         self.manager.enable()

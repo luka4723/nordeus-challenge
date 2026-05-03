@@ -96,7 +96,7 @@ class DarkPact(Move):
 
     def cast(self,target = None):
         self.caster.hp -= defs.DARKPACT_HEALTH_COST
-        target.status_effects.append(status_effects.IncreaseMagic(target,defs.DARKPACT_MAGIC_INC,defs.DARKPACT_LEN))
+        self.caster.status_effects.append(status_effects.IncreaseMagic(self.caster,defs.DARKPACT_MAGIC_INC,defs.DARKPACT_LEN))
 
 class Bite(Move):
     def __init__(self, caster):
@@ -277,13 +277,15 @@ class Shanking(Move):
         self.type.append("Status")
     
     def cast(self,target = None):
-        target.hp -= (self.caster.atk*defs.SLASH_DMG)/target.defense
+        target.hp -= (self.caster.atk*defs.SHANKING_DMG)/target.defense
         target.status_effects.append(status_effects.Bleed(target,defs.SHANKING_BLEED_DMG,defs.SHANKING_LEN))
     
 class DirtThrow(Move):
     def __init__(self, caster):
         super().__init__(caster)
-        self.desc = f"Type: Status Effect\nStat: DEF/ATK\nIncrease: {defs.DIRTTHROW_DEF_INC}\nnDecrease: {defs.DIRTTHROW_ATK_DEC}\nDuration: {defs.DIRTTHROW_LEN}"
+        self.desc = f"Type: Status Effect\nStat: DEF/ATK\nIncrease: {defs.DIRTTHROW_DEF_INC}\nDecrease: {defs.DIRTTHROW_ATK_DEC}\nDuration: {defs.DIRTTHROW_LEN}"
+        self.type.append("Status")
+
 
     def cast(self,target = None):
         target.status_effects.append(status_effects.DecreaseAtk(target,defs.DIRTTHROW_ATK_DEC,defs.DIRTTHROW_LEN))

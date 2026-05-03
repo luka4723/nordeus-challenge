@@ -48,6 +48,7 @@ class EndView(arcade.View):
         )
         @btn.event("on_click")
         def on_continue(event, view=self):
+            defs.SOUND.play(volume=0.08)
             view.window.show_view(view.return_view)
         layout.add(btn)
 

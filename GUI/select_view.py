@@ -1,4 +1,4 @@
-import arcade
+import arcade, arcade.gui
 from GUI import elements, game_view
 from game_logic import beings,defs
 
@@ -15,8 +15,9 @@ class SelectView(arcade.View):
         self.return_view = return_view
         self.names = ["Knight", "Wizard","Rogue","Berserker","Granny"]
         self.current = 0
+        self.icon = None
+        self.widget = None
         self.current_map = map
-        self.build_ui()
 
     def build_ui(self):
         self.manager.clear()
@@ -41,10 +42,11 @@ class SelectView(arcade.View):
         )
         @btn_left.event("on_click")
         def on_left(event, view=self):
+            defs.SOUND.play(volume=0.08)
             view.current = (view.current - 1) % len(view.names)
-            self.build_ui()
+            self.refresh()
 
-        icon = arcade.gui.UIImage(
+        self.icon = arcade.gui.UIImage(
             texture=defs.BEING_SPRITES[self.names[self.current]],
             width=96, height=96
         )
@@ -58,11 +60,12 @@ class SelectView(arcade.View):
         )
         @btn_right.event("on_click")
         def on_right(event, view=self):
+            defs.SOUND.play(volume=0.08)
             view.current = (view.current + 1) % len(view.names)
-            self.build_ui()
+            self.refresh()
 
         selector_row.add(btn_left)
-        selector_row.add(icon.with_border(width=2, color=arcade.color.GOLD))
+        selector_row.add(self.icon.with_border(width=2, color=arcade.color.GOLD))
         selector_row.add(btn_right)
         layout.add(selector_row)
 
@@ -76,15 +79,19 @@ class SelectView(arcade.View):
         )
         @btn_confirm.event("on_click")
         def on_confirm(event,view=self):
+            defs.SOUND.play(volume=0.08)
             hero = getattr(beings, self.names[self.current])()
             self.window.show_view(game_view.GameView(map=self.current_map,hero = hero, 
-                                                     play_tex=defs.BEING_SPRITES[self.names[self.current]]))
-            self.build_ui()
+                                                     play_tex=self.icon.texture))
         layout.add(btn_confirm)
 
-        self.widget = layout
         anchor = self.manager.add(arcade.gui.UIAnchorLayout())
         anchor.add(anchor_x="center_x", anchor_y="center_y", child=layout)
+        self.widget = layout
+
+    def refresh(self):
+        self.title_label.text = self.names[self.current].upper()
+        self.icon.texture = defs.BEING_SPRITES[self.names[self.current]]
 
     def on_show_view(self):
         self.manager.enable()
@@ -97,19 +104,20 @@ class SelectView(arcade.View):
         self.clear()
         arcade.draw_texture_rect(defs.MAP_IMGS[self.current_map],
                                  arcade.LBWH(0, 0, self.window.width, self.window.height))
-    
-        r = self.widget.rect
-        padding = 30
-        arcade.draw_lrbt_rectangle_filled(
-            r.left - padding, r.right + padding,
-            r.bottom - padding, r.top + padding,
-            (0, 0, 0, 180)
-        )
-        arcade.draw_lrbt_rectangle_outline(
-            r.left - padding, r.right + padding,
-            r.bottom - padding, r.top + padding,
-            border_width=2, color=arcade.color.GOLD
-        )
+        
+        if self.widget and self.widget.rect.width > 0:
+            r = self.widget.rect
+            padding = 30
+            arcade.draw_lrbt_rectangle_filled(
+                r.left - padding, r.right + padding,
+                r.bottom - padding, r.top + padding,
+                (0, 0, 0, 180)
+            )
+            arcade.draw_lrbt_rectangle_outline(
+                r.left - padding, r.right + padding,
+                r.bottom - padding, r.top + padding,
+                border_width=2, color=arcade.color.GOLD
+            )
         self.manager.draw()
 
     def on_key_press(self, key, modifiers):

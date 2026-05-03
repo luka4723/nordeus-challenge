@@ -2,13 +2,13 @@ import arcade
 import arcade.gui
 import time
 
-
-
 class MyButton(arcade.gui.UITextureButton):
-    def __init__(self, text, text_size,parent_win=None, **kwargs):
-        super().__init__(**kwargs)
-        self.button_text = text
+    def __init__(self, text, text_size, parent_win=None, **kwargs):
+        super().__init__(text="", **kwargs) 
+        
+        self._button_text = text
         arcade.load_font(":resources:/fonts/ttf/Kenney/Kenney_Mini.ttf")
+        
         self.layout = arcade.gui.UIAnchorLayout(width=self.width, height=self.height)
         self.label = arcade.gui.UILabel(
             text=text,
@@ -22,11 +22,15 @@ class MyButton(arcade.gui.UITextureButton):
         self.parent_win = parent_win
         self.add(self.layout)
 
-    def apply_style(self, state):
-        super().apply_style(state)
+    @property
+    def text(self):
+        return self._button_text
 
+    @text.setter
+    def text(self, value):
+        self._button_text = value
+        self.label.text = value 
 
-    
     def on_event(self, event):
         if isinstance(event, arcade.gui.events.UIMouseMovementEvent):     
             if self.parent_win:
@@ -39,9 +43,6 @@ class MyButton(arcade.gui.UITextureButton):
                     if self.parent_win.hovered_move is self.move:
                         self.parent_win.hovered_move = None
                         self.parent_win.hover_start_time = 0
-
                         self.parent_win.hovered_button = None
-    
+        
         super().on_event(event)
-
-       
