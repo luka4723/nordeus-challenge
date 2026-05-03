@@ -36,6 +36,12 @@ class GameView(arcade.View):
         self.mag_label = None
         self.player_slot_images = []
         self.stat_up_buttons = []
+
+        #For tooltip
+        self.hovered_move = None
+        self.hover_start_time = 0
+        self.hovered_button = None
+        self.tooltip_delay = 0.75
         
         self.empty_texture = arcade.Texture.create_empty("empty_slot", (80, 80))
 
@@ -311,8 +317,9 @@ class GameView(arcade.View):
                 texture=self.enemy_textures[floor],
                 texture_hovered=self.enemy_textures[floor],
                 texture_pressed=self.enemy_textures[floor],
-                width=80, height=80, text_size=1
+                width=80, height=80, text_size=1, parent_win=self
             )
+            btn.move = self.enemies[floor]
             btn.floor = floor
             @btn.event("on_click")
             def on_enemy_click(event,b=btn):
@@ -437,4 +444,34 @@ class GameView(arcade.View):
             arcade.draw_lbwh_rectangle_outline(
                 r.left, r.bottom, r.width, r.height,
                 color=arcade.color.DARK_BLUE, border_width=3
+            )
+
+        if self.hovered_move and (time.time() - self.hover_start_time) > self.tooltip_delay:
+            scale = self.window.get_pixel_ratio()
+            x = self.window._mouse_x / scale
+            y = self.window._mouse_y / scale
+            width = 85
+            height = 100
+
+            arcade.draw_lbwh_rectangle_filled(x-width, y, width, height, (20, 20, 30, 230))
+            arcade.draw_lbwh_rectangle_outline(x-width, y, width, height, arcade.color.GOLD, 2)
+
+            arcade.draw_text(
+                type(self.hovered_move).__name__,
+                x + 5-width,
+                y + height,
+                arcade.color.GOLD,
+                16,
+                font_name="Kenney Mini"
+            )
+
+            arcade.draw_text(
+                f"HP: {round(self.hovered_move.hp)}\nATK: {round(self.hovered_move.atk,2)}\nDEF: {round(self.hovered_move.defense,2)}\nMAG: {round(self.hovered_move.magic,2)}\nOrder: {round(self.hovered_move.order,2)}\n",
+                x + 5-width,
+                y - 5 + height - 12,
+                arcade.color.WHITE,
+                12,
+                width=280,
+                multiline=True,
+                font_name="Kenney Mini"
             )
