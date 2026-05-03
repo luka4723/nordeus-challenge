@@ -223,7 +223,7 @@ class EquipmentView(arcade.View):
             scale = self.window.get_pixel_ratio()
             x = self.window._mouse_x / scale
             y = self.window._mouse_y / scale
-            width = 180
+            width = 200
             height = 25
 
             arcade.draw_lbwh_rectangle_filled(x, y, width, height, (20, 20, 30, 230))

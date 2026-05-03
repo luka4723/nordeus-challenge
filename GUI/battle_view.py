@@ -220,6 +220,7 @@ class BattleView(arcade.View):
                     effect.remove()
                 self.enemy.hp = self.enemy.max_hp
                 self.hero.status_effects = []
+                self.enemy.status_effects = []
 
                 order    = random.randint(0, 3)
                 move     = None
