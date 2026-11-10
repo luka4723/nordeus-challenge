@@ -5,9 +5,6 @@ Turn based RPG game in python using arcade library and client/server architectur
   2. Run `uvicorn server:app --reload` in dedicated terminal
   3. Run main.py  
 
-Note: I was using python version 3.14.3. In demo, hero is stronger than usual for time saving purposes.  
-
-Note2: The game window is intended to be smaller than shown in the demo (windows scale setting affects the size). The cursor is mine and is not a part of the game.
 ### About the game  
 Turn based combat against a gauntlet of enemies. Each enemy is stronger than the last. At the beginning the player can choose which hero to play as. 
 Enemies drop items, moves, xp, and gold. All characters have pre-defined stats: HP, ATK, DEF, MAG. You can view enemy stats by hovering over their icon.
